@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import AuthActions from '@/components/AuthActions';
+import Link from 'next/link';
 
 /**
  * Party Bees — Captivating landing page (Tailwind)
@@ -74,14 +75,14 @@ export default function HomePage() {
         
 
         <nav className="flex items-center gap-4">
-          <a href="/events" className="text-sm font-medium hover:text-yellow-600">Events</a>
-          <a href="/about" className="text-sm font-medium hover:text-yellow-600">About</a>
-          <a href="/hostevent" className="hidden sm:inline-block px-4 py-2 rounded-lg bg-yellow-500 text-white font-semibold shadow hover:bg-yellow-600 transition">
+          <Link href="/events" className="text-sm font-medium hover:text-yellow-600">Events</Link>
+          <Link href="/about" className="text-sm font-medium hover:text-yellow-600">About</Link>
+          <Link href="/hostevent" className="hidden sm:inline-block px-4 py-2 rounded-lg bg-yellow-500 text-white font-semibold shadow hover:bg-yellow-600 transition">
             Host a Party
-          </a>
-            <a href="/user-profile" className="text-sm font-medium hover:text-yellow-600">Profile</a>
-               <a href="/admin" className="text-sm font-medium hover:text-yellow-600">Admin</a>
-          <a href="/login" className="text-sm" >Log in</a>
+          </Link>
+            <Link href="/user-profile" className="text-sm font-medium hover:text-yellow-600">Profile</Link>
+               <Link href="/admin" className="text-sm font-medium hover:text-yellow-600">Admin</Link>
+          <Link href="/login" className="text-sm" >Log in</Link>
         </nav>
       </header>
 
@@ -159,9 +160,9 @@ export default function HomePage() {
               <div className="font-bold">Sunset Rooftop Bash</div>
               <div className="text-xs text-slate-500">Lagos • Sat, Oct 4</div>
             </div>
-            <a href="/events/create" className="px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-semibold shadow">
+            <Link href="/events/create" className="px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-semibold shadow">
               Create event
-            </a>
+            </Link>
           </div>
         </div>
       </section>
