@@ -193,7 +193,7 @@ export default function HomePage() {
                 <div className="mt-3 flex items-center justify-between">
                   <div className="text-xs text-slate-600">{p.attendees} going</div>
                   <div className="flex gap-2">
-                    <a href={`/events/${p.id}`} className="text-yellow-600 text-sm font-semibold hover:underline">View</a>
+                    <Link href={`/events/${p.id}`} className="text-yellow-600 text-sm font-semibold hover:underline">View</Link>
                     <button className="px-3 py-1 rounded-lg bg-yellow-500 text-white text-sm font-medium shadow">RSVP</button>
                   </div>
                 </div>
@@ -272,8 +272,8 @@ export default function HomePage() {
             <p className="text-sm opacity-90">Sign up for free and discover parties near you — or host your own.</p>
           </div>
           <div className="flex gap-3">
-            <a href="/signup" className="px-5 py-2 bg-white text-yellow-600 rounded-full font-semibold shadow">Get Started</a>
-            <a href="/events" className="px-5 py-2 border border-white/60 rounded-full">Browse events</a>
+            <Link href="/signup" className="px-5 py-2 bg-white text-yellow-600 rounded-full font-semibold shadow">Get Started</Link>
+            <Link href="/events" className="px-5 py-2 border border-white/60 rounded-full">Browse events</Link>
           </div>
         </div>
       </section>
@@ -283,9 +283,9 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 md:flex md:items-center md:justify-between">
           <div>© {new Date().getFullYear()} Party Bees</div>
           <div className="flex gap-6 mt-4 md:mt-0">
-            <a href="/terms" className="hover:underline">Terms</a>
-            <a href="/privacy" className="hover:underline">Privacy</a>
-            <a href="/help" className="hover:underline">Help</a>
+            <Link href="/terms" className="hover:underline">Terms</Link>
+            <Link href="/privacy" className="hover:underline">Privacy</Link>
+            <Link href="/help" className="hover:underline">Help</Link>
           </div>
         </div>
       </footer>
