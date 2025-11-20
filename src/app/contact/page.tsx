@@ -20,22 +20,40 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Client-side validation
+    if (!form.name.trim() || !form.email.trim() || !form.subject.trim() || !form.message.trim()) {
+      showToast('Please fill in all fields', 'error');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email)) {
+      showToast('Please enter a valid email address', 'error');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // In a real app, you'd send this to your backend API
-      // For now, we'll just show a success message
-      // You can integrate with services like SendGrid, Resend, or Formspree
-      
-      const mailtoLink = `mailto:support@skiboh.com?subject=${encodeURIComponent(form.subject)}&body=${encodeURIComponent(`Name: ${form.name}\nEmail: ${form.email}\n\nMessage:\n${form.message}`)}`;
-      window.location.href = mailtoLink;
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
 
-      showToast('Opening your email client...', 'info');
-      
-      // Reset form
-      setForm({ name: '', email: '', subject: '', message: '' });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        showToast('Message sent successfully! We\'ll get back to you soon.', 'success');
+        // Reset form
+        setForm({ name: '', email: '', subject: '', message: '' });
+      } else {
+        showToast(data.error || 'Failed to send message. Please try again.', 'error');
+      }
     } catch (error) {
-      showToast('Failed to send message. Please try again.', 'error');
+      console.error('Contact form error:', error);
+      showToast('An unexpected error occurred. Please try again.', 'error');
     } finally {
       setLoading(false);
     }

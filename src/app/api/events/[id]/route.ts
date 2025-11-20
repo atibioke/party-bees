@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Event from '@/models/Event';
+import { validateNigerianPhone } from '@/utils/phone';
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -48,6 +49,18 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     
     if (!event) {
       return NextResponse.json({ success: false, error: 'Event not found' }, { status: 404 });
+    }
+    
+    // Validate organizer phone number if provided
+    if (body.organizerPhone) {
+      const phoneValidation = validateNigerianPhone(body.organizerPhone);
+      if (!phoneValidation.isValid) {
+        return NextResponse.json(
+          { success: false, error: phoneValidation.error || 'Invalid phone number' },
+          { status: 400 }
+        );
+      }
+      body.organizerPhone = phoneValidation.formatted;
     }
     
     const updatedEvent = await Event.findByIdAndUpdate(event._id, body, {

@@ -15,6 +15,12 @@ export interface IUser extends Document {
   // Terms acceptance
   acceptedTerms: boolean;
   termsAcceptedAt?: Date;
+  // Verification & Password Reset
+  isVerified: boolean;
+  verificationToken?: string;
+  verificationTokenExpires?: Date;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -35,6 +41,12 @@ const UserSchema: Schema = new Schema(
     // Terms acceptance
     acceptedTerms: { type: Boolean, default: false },
     termsAcceptedAt: { type: Date },
+    // Verification & Password Reset
+    isVerified: { type: Boolean, default: false },
+    verificationToken: { type: String },
+    verificationTokenExpires: { type: Date },
+    resetPasswordToken: { type: String },
+    resetPasswordExpires: { type: Date },
   },
   {
     timestamps: true,

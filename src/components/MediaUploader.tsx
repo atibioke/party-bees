@@ -30,6 +30,10 @@ export default function MediaUploader({
     const [isDragging, setIsDragging] = useState(false);
     const [uploadError, setUploadError] = useState<string>('');
     const fileInputRef = useRef<HTMLInputElement>(null);
+    
+    // Keep track of the latest value to avoid stale closures in async operations
+    const valueRef = useRef(value);
+    valueRef.current = value;
 
     const imageCount = value.filter((m) => m.type === 'image').length;
     const videoCount = value.filter((m) => m.type === 'video').length;
@@ -55,6 +59,10 @@ export default function MediaUploader({
             const files = Array.from(e.target.files);
             handleFiles(files);
         }
+        // Reset input so same file can be selected again
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
     };
 
     const handleFiles = async (files: File[]) => {
@@ -70,13 +78,17 @@ export default function MediaUploader({
                 continue;
             }
 
+            // Calculate current counts from the ref (latest state)
+            const currentImages = valueRef.current.filter((m) => m.type === 'image').length;
+            const currentVideos = valueRef.current.filter((m) => m.type === 'video').length;
+
             // Check limits
-            if (isImage && imageCount >= maxImages) {
+            if (isImage && currentImages >= maxImages) {
                 setUploadError(`Maximum ${maxImages} images allowed`);
                 continue;
             }
 
-            if (isVideo && videoCount >= maxVideos) {
+            if (isVideo && currentVideos >= maxVideos) {
                 setUploadError(`Maximum ${maxVideos} video allowed`);
                 continue;
             }
@@ -94,15 +106,18 @@ export default function MediaUploader({
     };
 
     const uploadFile = async (file: File, type: 'image' | 'video') => {
+        // Use ref to get latest value
+        const currentValue = valueRef.current;
+        
         // Add to state with uploading flag
         const tempMedia: MediaFile = {
             url: URL.createObjectURL(file),
             type,
-            order: value.length,
+            order: currentValue.length,
             uploading: true,
         };
 
-        onChange([...value, tempMedia]);
+        onChange([...currentValue, tempMedia]);
 
         try {
             const formData = new FormData();
@@ -119,18 +134,19 @@ export default function MediaUploader({
                 throw new Error(data.error || 'Upload failed');
             }
 
-            // Update with actual URL
+            // Update with actual URL - replace the temp media with the uploaded one
+            // Use valueRef.current again to ensure we have any other updates that happened during upload
             onChange(
-                value.map((m) =>
+                valueRef.current.map((m) =>
                     m.url === tempMedia.url
                         ? { ...m, url: data.data.url, uploading: false }
                         : m
-                ).concat({ url: data.data.url, type: data.data.type, order: value.length })
+                )
             );
         } catch (error: any) {
             setUploadError(error.message || 'Upload failed');
-            // Remove failed upload
-            onChange(value.filter((m) => m.url !== tempMedia.url));
+            // Remove failed upload using latest state
+            onChange(valueRef.current.filter((m) => m.url !== tempMedia.url));
         }
     };
 
@@ -145,7 +161,13 @@ export default function MediaUploader({
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
+                onClick={(e) => {
+                    // Only trigger click if it wasn't the input itself (though input is hidden)
+                    if (e.target !== fileInputRef.current) {
+                        e.preventDefault();
+                        fileInputRef.current?.click();
+                    }
+                }}
                 className={`
           relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer
           transition-all duration-200
@@ -191,12 +213,19 @@ export default function MediaUploader({
 
             {/* Preview Grid */}
             {value.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {value.map((media, index) => (
-                        <div
-                            key={index}
-                            className="relative aspect-video rounded-xl overflow-hidden bg-slate-800 group"
-                        >
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-semibold text-white">Your Media ({value.length})</h4>
+                        <span className="text-xs text-slate-400">
+                            {imageCount} image{imageCount !== 1 ? 's' : ''}, {videoCount} video{videoCount !== 1 ? 's' : ''}
+                        </span>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {value.map((media, index) => (
+                            <div
+                                key={`${media.url}-${index}-${media.order}`}
+                                className="relative aspect-video rounded-xl overflow-hidden bg-slate-800 group border-2 border-slate-700 hover:border-pink-500/50 transition-all shadow-lg hover:shadow-xl"
+                            >
                             {media.uploading ? (
                                 <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80">
                                     <Loader2 className="w-8 h-8 text-pink-500 animate-spin" />
@@ -214,23 +243,31 @@ export default function MediaUploader({
 
                             {!media.uploading && (
                                 <button
-                                    onClick={() => removeMedia(index)}
-                                    className="absolute top-2 right-2 p-2 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        removeMedia(index);
+                                    }}
+                                    className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 rounded-full transition-all z-10 shadow-lg hover:scale-110 active:scale-95"
+                                    title="Remove media"
                                 >
                                     <X className="w-4 h-4 text-white" />
                                 </button>
                             )}
 
-                            <div className="absolute bottom-2 left-2 px-2 py-1 bg-slate-900/80 rounded text-xs text-white flex items-center gap-1">
+                            <div className="absolute bottom-2 left-2 px-2 py-1 bg-slate-900/90 rounded text-xs text-white flex items-center gap-1 font-medium">
                                 {media.type === 'image' ? (
                                     <ImageIcon className="w-3 h-3" />
                                 ) : (
                                     <Video className="w-3 h-3" />
                                 )}
-                                {media.type}
+                                {media.type === 'image' ? 'Image' : 'Video'}
                             </div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                         </div>
                     ))}
+                    </div>
                 </div>
             )}
         </div>

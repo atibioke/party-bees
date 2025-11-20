@@ -4,6 +4,7 @@ import User from '@/models/User';
 import { signJWT } from '@/lib/auth';
 import { cookies } from 'next/headers';
 import { logDebug } from '@/lib/logger';
+import { sendEmail } from '@/lib/mail';
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -110,6 +111,7 @@ export async function GET(req: NextRequest) {
         logDebug('Found existing user by email. Linking Google Account.', { email: user.email });
         user.googleId = googleUser.sub;
         user.provider = 'google';
+        user.isVerified = true; // Trust Google verification
         await user.save();
       }
     }
@@ -125,6 +127,22 @@ export async function GET(req: NextRequest) {
         provider: 'google',
         profileCompleted: false,
         acceptedTerms: false,
+        isVerified: true, // Google emails are verified
+      });
+
+      // Send welcome email
+      await sendEmail({
+        to: googleUser.email,
+        subject: 'Welcome to Skiboh!',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #EC4899;">Welcome to Skiboh!</h2>
+            <p>Hi ${googleUser.name},</p>
+            <p>Thanks for signing up with Google. We are excited to have you on board!</p>
+            <p>Complete your profile to start hosting amazing parties.</p>
+            <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard" style="display: inline-block; background-color: #EC4899; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 20px 0;">Go to Dashboard</a>
+          </div>
+        `,
       });
     }
 
@@ -135,6 +153,7 @@ export async function GET(req: NextRequest) {
       role: user.role,
       profileCompleted: user.profileCompleted,
       acceptedTerms: user.acceptedTerms,
+      isVerified: user.isVerified
     });
 
     const cookieStore = await cookies();

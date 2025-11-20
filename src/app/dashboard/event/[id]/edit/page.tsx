@@ -1,6 +1,6 @@
 'use client';
 
-import { Upload, ChevronLeft, ChevronRight, Save } from "lucide-react";
+import { ChevronLeft, ChevronRight, Save, Trash2, Users } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/Input";
 import DatePicker from "react-datepicker";
@@ -8,6 +8,10 @@ import "react-datepicker/dist/react-datepicker.css";
 import statesData from "@/utils/states.json";
 import { useParams, useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
+import MediaUploader from "@/components/MediaUploader";
+import Link from "next/link";
+import { validateNigerianPhone } from "@/utils/phone";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 
 interface EventFormData {
     title: string;
@@ -19,8 +23,14 @@ interface EventFormData {
     host: string;
     organizerPhone: string;
     organizerEmail: string;
-    flyer: string;
+    flyer: string; // Legacy - kept for backward compatibility
+    media: {
+        url: string;
+        type: 'image' | 'video';
+        order: number;
+    }[];
     description: string;
+    category: string;
     isPaid: boolean;
     price: string;
     paymentDetails: string;
@@ -39,7 +49,7 @@ const VIBE_LABELS = [
     "Live Music 🎵", "Shisha Available 💨"
 ];
 
-
+const CATEGORIES = ['Nightlife', 'Music', 'Luxury', 'Food & Drink', 'Networking', 'Arts & Culture', 'Sports', 'Other'];
 
 export default function EditEventPage() {
     const params = useParams();
@@ -59,7 +69,9 @@ export default function EditEventPage() {
         organizerPhone: "",
         organizerEmail: "",
         flyer: "",
+        media: [],
         description: "",
+        category: "",
         isPaid: false,
         price: "",
         paymentDetails: "",
@@ -71,8 +83,6 @@ export default function EditEventPage() {
         recurrenceEndDate: null,
         recurrenceCount: 10,
     });
-
-    const [dragActive, setDragActive] = useState(false);
 
     useEffect(() => {
         const fetchEvent = async () => {
@@ -90,6 +100,19 @@ export default function EditEventPage() {
                     if (!eventData.recurrenceInterval) eventData.recurrenceInterval = 1;
                     if (!eventData.recurrenceEndType) eventData.recurrenceEndType = 'never';
                     if (!eventData.recurrenceCount) eventData.recurrenceCount = 10;
+                    if (!eventData.category) eventData.category = 'Other';
+                    // Ensure media array exists and is properly formatted
+                    if (!eventData.media) {
+                        eventData.media = [];
+                        // If there's a legacy flyer, add it as media
+                        if (eventData.flyer) {
+                            eventData.media.push({
+                                url: eventData.flyer,
+                                type: 'image',
+                                order: 0
+                            });
+                        }
+                    }
                     setFormData(eventData);
                 } else {
                     console.error("Failed to fetch event");
@@ -134,10 +157,56 @@ export default function EditEventPage() {
     const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const { showToast } = useToast();
+    const { confirm } = useConfirm();
+
+    const handleDelete = async () => {
+        const confirmed = await confirm({
+            title: 'Delete Event',
+            message: `Are you sure you want to delete "${formData.title}"? This action cannot be undone.`,
+            confirmText: 'Delete',
+            cancelText: 'Cancel'
+        });
+        
+        if (!confirmed) {
+            return;
+        }
+
+        setIsDeleting(true);
+        try {
+            const res = await fetch(`/api/events/${id}`, {
+                method: 'DELETE',
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                showToast('Event deleted successfully', 'success');
+                setTimeout(() => {
+                    router.push('/dashboard');
+                }, 500);
+            } else {
+                showToast(data.error || 'Failed to delete event', 'error');
+            }
+        } catch (error) {
+            console.error("Error deleting event:", error);
+            showToast('An unexpected error occurred', 'error');
+        } finally {
+            setIsDeleting(false);
+        }
+    };
 
     const saveEvent = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
+        
+        // Validate phone number
+        const phoneValidation = validateNigerianPhone(formData.organizerPhone);
+        if (!phoneValidation.isValid) {
+            showToast(phoneValidation.error || 'Invalid phone number', 'error');
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             const res = await fetch(`/api/events/${id}`, {
@@ -145,7 +214,10 @@ export default function EditEventPage() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify({
+                    ...formData,
+                    organizerPhone: phoneValidation.formatted
+                }),
             });
 
             const data = await res.json();
@@ -164,22 +236,6 @@ export default function EditEventPage() {
         } finally {
             setIsSubmitting(false);
         }
-    };
-
-    const handleDrag = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (e.type === "dragenter" || e.type === "dragover") {
-            setDragActive(true);
-        } else if (e.type === "dragleave") {
-            setDragActive(false);
-        }
-    };
-
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setDragActive(false);
     };
 
     if (loading) {
@@ -206,7 +262,23 @@ export default function EditEventPage() {
                     <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">Edit Event</h1>
                     <p className="text-slate-400 text-sm md:text-base">Update details for <span className="text-white font-bold">{formData.title || "your event"}</span>.</p>
                 </div>
-                <div className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Step {step} of 3</div>
+                <div className="flex items-center gap-4">
+                    <div className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Step {step} of 3</div>
+                    <Link href={`/dashboard/event/${id}/attendees`}>
+                        <button className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-2">
+                            <Users size={16} />
+                            View Attendees
+                        </button>
+                    </Link>
+                    <button
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                        className="px-4 py-2 text-sm font-medium text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                        <Trash2 size={16} />
+                        {isDeleting ? 'Deleting...' : 'Delete'}
+                    </button>
+                </div>
             </div>
 
             <div className="bg-[#131722] border border-slate-800 rounded-3xl shadow-2xl overflow-hidden">
@@ -239,6 +311,23 @@ export default function EditEventPage() {
                                     className="bg-[#0B0F17] border-slate-800"
                                     autoFocus
                                 />
+
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Category</label>
+                                    <select
+                                        name="category"
+                                        value={formData.category}
+                                        onChange={handleChange}
+                                        className="w-full bg-[#0B0F17] border border-slate-800 rounded-xl px-3 py-2.5 md:px-4 md:py-3 text-white text-sm focus:outline-none focus:border-white/30 transition-colors appearance-none"
+                                    >
+                                        <option value="">Select Category</option>
+                                        {CATEGORIES.map((cat) => (
+                                            <option key={cat} value={cat}>
+                                                {cat}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
@@ -412,14 +501,24 @@ export default function EditEventPage() {
                                         placeholder="e.g. Party Kings"
                                         className="bg-[#0B0F17] border-slate-800"
                                     />
-                                    <Input
-                                        label="Phone / WhatsApp"
-                                        name="organizerPhone"
-                                        value={formData.organizerPhone}
-                                        onChange={handleChange}
-                                        placeholder="+234..."
-                                        className="bg-[#0B0F17] border-slate-800"
-                                    />
+                                    <div>
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Phone / WhatsApp</label>
+                                        <input
+                                            type="tel"
+                                            name="organizerPhone"
+                                            value={formData.organizerPhone}
+                                            onChange={handleChange}
+                                            onBlur={e => {
+                                                const validation = validateNigerianPhone(e.target.value);
+                                                if (validation.isValid && validation.formatted) {
+                                                    setFormData(prev => ({ ...prev, organizerPhone: validation.formatted! }));
+                                                }
+                                            }}
+                                            placeholder="+234 800 000 0000 or 0800 000 0000"
+                                            className="w-full bg-[#0B0F17] border border-slate-800 rounded-xl px-3 py-2.5 md:px-4 md:py-3 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+                                        />
+                                        <p className="text-xs text-slate-500 mt-1">Format: +234 800 000 0000 or 0800 000 0000</p>
+                                    </div>
                                 </div>
 
                             </div>
@@ -435,38 +534,17 @@ export default function EditEventPage() {
                             </div>
 
                             <div className="space-y-5">
-                                {/* Flyer Upload */}
+                                {/* Media Upload */}
                                 <div>
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Event Flyer</label>
-                                    <div
-                                        className={`border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer ${dragActive
-                                            ? 'border-white bg-white/5'
-                                            : 'border-slate-800 bg-[#0B0F17] hover:border-slate-600'
-                                            }`}
-                                        onDragEnter={handleDrag}
-                                        onDragLeave={handleDrag}
-                                        onDragOver={handleDrag}
-                                        onDrop={handleDrop}
-                                    >
-                                        <div className="flex flex-col items-center gap-2">
-                                            {formData.flyer ? (
-                                                <img src={formData.flyer} alt="Preview" className="h-32 object-cover rounded-lg mb-2" />
-                                            ) : (
-                                                <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center">
-                                                    <Upload className="w-5 h-5 text-slate-400" />
-                                                </div>
-                                            )}
-                                            <p className="text-sm font-medium text-white">Click to upload or drag and drop</p>
-                                            <p className="text-xs text-slate-500">PNG, JPG (max. 5MB)</p>
-                                        </div>
-                                    </div>
-                                    <input
-                                        name="flyer"
-                                        placeholder="Or paste image URL..."
-                                        value={formData.flyer}
-                                        onChange={handleChange}
-                                        className="w-full bg-[#0B0F17] border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm mt-3 focus:outline-none focus:border-white/30"
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Event Media</label>
+                                    <MediaUploader
+                                        value={formData.media}
+                                        onChange={(media) => setFormData(prev => ({ ...prev, media }))}
+                                        maxImages={5}
+                                        maxVideos={1}
+                                        maxSizeMB={20}
                                     />
+                                    <p className="text-xs text-slate-500 mt-2">Upload up to 5 images and 1 video (max 20MB each)</p>
                                 </div>
 
                                 {/* Ticket Type */}

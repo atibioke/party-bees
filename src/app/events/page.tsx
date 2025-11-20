@@ -10,7 +10,8 @@ import {
   Calendar,
   Filter,
   Music,
-  Loader2
+  Loader2,
+  PartyPopperIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { UserMenu } from '@/components/UserMenu';
@@ -184,7 +185,7 @@ export default function EventsPage() {
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2 group">
               <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-lg shadow-lg shadow-pink-500/10 text-slate-900">
-
+              <PartyPopperIcon size={24} />
               </div>
               <span className="text-xl font-bold text-white hidden md:block">Skiboh</span>
             </Link>

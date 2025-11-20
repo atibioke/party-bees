@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+
 import MediaGallery from '@/components/MediaGallery';
 import {
   CalendarDays,
@@ -11,9 +11,7 @@ import {
   Share2,
   ArrowLeft,
   Star,
-  Eye,
   Lock,
-  Phone,
   MessageCircle,
   PartyPopper,
   X
@@ -21,6 +19,8 @@ import {
 import { Button } from '@/components/ui/Button';
 import { UserMenu } from '@/components/UserMenu';
 import { useParams } from 'next/navigation';
+import { validateNigerianPhone } from '@/utils/phone';
+import { useToast } from '@/components/ui/Toast';
 
 type Attendee = { name: string; avatarUrl?: string };
 
@@ -72,9 +72,9 @@ export default function EventDetailsPage() {
   const [showInterestForm, setShowInterestForm] = useState(false);
   const [interestForm, setInterestForm] = useState({ name: '', phone: '', email: '', acceptedTerms: false });
   const [submittingInterest, setSubmittingInterest] = useState(false);
-  const [interestSubmitted, setInterestSubmitted] = useState(false);
 
   const [isCopySuccess, setIsCopySuccess] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -169,12 +169,19 @@ export default function EventDetailsPage() {
 
   const handleSubmitInterest = async () => {
     if (!interestForm.name || !interestForm.phone) {
-      alert('Please fill in your name and phone number');
+      showToast('Please fill in your name and phone number', 'error');
+      return;
+    }
+
+    // Validate Nigerian phone number
+    const phoneValidation = validateNigerianPhone(interestForm.phone);
+    if (!phoneValidation.isValid) {
+      showToast(phoneValidation.error || 'Invalid phone number', 'error');
       return;
     }
 
     if (!interestForm.acceptedTerms) {
-      alert('You must accept the terms and conditions');
+      showToast('You must accept the terms and conditions', 'error');
       return;
     }
 
@@ -184,22 +191,25 @@ export default function EventDetailsPage() {
       const res = await fetch(`/api/events/${slug}/attendees`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(interestForm)
+        body: JSON.stringify({
+          ...interestForm,
+          phone: phoneValidation.formatted
+        })
       });
 
       const data = await res.json();
 
       if (data.success) {
-        setInterestSubmitted(true);
+        showToast('Interest submitted successfully!', 'success');
         setShowInterestForm(false);
         setIsBlurred(false);
         setContactRevealed(true);
       } else {
-        alert(data.error || 'Failed to submit interest');
+        showToast(data.error || 'Failed to submit interest', 'error');
       }
     } catch (error) {
       console.error('Submit interest error:', error);
-      alert('An error occurred. Please try again.');
+      showToast('An error occurred. Please try again.', 'error');
     } finally {
       setSubmittingInterest(false);
     }
@@ -210,14 +220,6 @@ export default function EventDetailsPage() {
     window.location.href = `/api/events/${slug}/contact-organizer`;
   };
 
-  // Generate WhatsApp link
-  const getWhatsAppLink = (phone: string) => {
-    // Remove any non-digit characters except +
-    const cleanPhone = phone.replace(/[^\d+]/g, '');
-    // If it doesn't start with +, assume it's a Nigerian number and add country code
-    const whatsappNumber = cleanPhone.startsWith('+') ? cleanPhone : `+234${cleanPhone.replace(/^0/, '')}`;
-    return `https://wa.me/${whatsappNumber.replace(/\+/g, '')}`;
-  };
 
   if (loading) {
     return (
@@ -602,23 +604,19 @@ export default function EventDetailsPage() {
                     type="tel"
                     value={interestForm.phone}
                     onChange={e => setInterestForm({ ...interestForm, phone: e.target.value })}
+                    onBlur={e => {
+                      const validation = validateNigerianPhone(e.target.value);
+                      if (validation.isValid && validation.formatted) {
+                        setInterestForm({ ...interestForm, phone: validation.formatted });
+                      }
+                    }}
                     className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition"
                     placeholder="+234 800 000 0000"
                   />
+                  <p className="text-xs text-slate-500 mt-1">Format: +234 800 000 0000 or 0800 000 0000</p>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Email Address <span className="text-slate-500 text-xs">(Optional)</span>
-                  </label>
-                  <input
-                    type="email"
-                    value={interestForm.email}
-                    onChange={e => setInterestForm({ ...interestForm, email: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition"
-                    placeholder="your.email@example.com"
-                  />
-                </div>
+                
 
                 <div className="flex items-start gap-3 p-4 rounded-xl bg-slate-800/50 border border-slate-700">
                   <input

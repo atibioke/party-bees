@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { User, Calendar, Clock, MapPin, CheckCircle, MoreVertical, Plus } from "lucide-react";
+import { User, Calendar, Clock, MapPin, CheckCircle, MoreVertical, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useToast } from "@/components/ui/Toast";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<"profile" | "upcoming" | "past">("upcoming");
@@ -11,6 +13,7 @@ export default function Dashboard() {
   const [events, setEvents] = useState<Array<{
     _id: string;
     id?: string;
+    slug?: string;
     title: string;
     startDateTime: string;
     endDateTime: string;
@@ -19,6 +22,7 @@ export default function Dashboard() {
     address: string;
     flyer?: string;
     image?: string;
+    media?: { url: string; type: string }[];
     isPaid: boolean;
     price?: string;
     labels?: string[];
@@ -27,6 +31,9 @@ export default function Dashboard() {
     date?: string;
   }>>([]);
   const [loading, setLoading] = useState(true);
+  const { showToast } = useToast();
+  const { confirm } = useConfirm();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,8 +63,47 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
-  const upcomingEvents = events.filter(e => new Date(e.startDateTime) > new Date());
-  const pastEvents = events.filter(e => new Date(e.startDateTime) <= new Date());
+  const handleDeleteEvent = async (eventId: string, eventTitle: string) => {
+    const confirmed = await confirm({
+      title: 'Delete Event',
+      message: `Are you sure you want to delete "${eventTitle}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel'
+    });
+    
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingId(eventId);
+    try {
+      const res = await fetch(`/api/events/${eventId}`, {
+        method: 'DELETE',
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok && data.success) {
+        setEvents(prev => prev.filter(e => (e._id || e.id) !== eventId));
+        showToast('Event deleted successfully', 'success');
+      } else {
+        showToast(data.error || 'Failed to delete event', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      showToast('An unexpected error occurred', 'error');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const upcomingEvents = events
+    .filter(e => new Date(e.startDateTime) > new Date())
+    .sort((a, b) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime());
+
+  const pastEvents = events
+    .filter(e => new Date(e.startDateTime) <= new Date())
+    .sort((a, b) => new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime());
 
   return (
     <>
@@ -136,7 +182,7 @@ export default function Dashboard() {
                     <div key={event._id || event.id} className="bg-[#131722] border border-slate-800/60 rounded-2xl p-4 flex flex-col md:flex-row gap-6 hover:border-slate-700 transition-all group">
                       <div className="w-full md:w-64 h-48 md:h-40 relative rounded-xl overflow-hidden shrink-0">
                         <Image
-                          src={event.flyer || event.image || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80"}
+                          src={event.media?.[0]?.url || event.flyer || event.image || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80"}
                           alt={event.title}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -179,11 +225,24 @@ export default function Dashboard() {
                             <span className="font-bold text-white">{event.attendees || 0}</span>
                             <span className="text-slate-500">Confirmed Guests</span>
                           </div>
-                          <div className="flex gap-2">
-                            <button className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">View Details</button>
+                          <div className="flex gap-2 flex-wrap">
+                            <Link href={`/dashboard/event/${event._id || event.id}/attendees`}>
+                              <button className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">View Attendees</button>
+                            </Link>
+                            <Link href={`/events/${event.slug || event._id || event.id}`}>
+                              <button className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">View Details</button>
+                            </Link>
                             <Link href={`/dashboard/event/${event._id || event.id}/edit`}>
                               <button className="px-4 py-2 text-sm font-medium bg-white text-slate-900 rounded-lg hover:bg-slate-200 transition-colors">Edit Event</button>
                             </Link>
+                            <button 
+                              onClick={() => handleDeleteEvent(event._id || event.id || '', event.title)}
+                              disabled={deletingId === (event._id || event.id)}
+                              className="px-3 py-2 text-slate-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
+                              title="Delete Event"
+                            >
+                              <Trash2 size={18} />
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -213,7 +272,7 @@ export default function Dashboard() {
               {pastEvents.map(event => (
                 <div key={event.id} className="bg-[#131722] border border-slate-800/60 rounded-2xl p-4 flex gap-4 hover:border-slate-700 transition-all opacity-75 hover:opacity-100">
                   <div className="w-24 h-24 relative rounded-lg overflow-hidden shrink-0 bg-slate-800">
-                    <Image src={event.image || event.flyer || '/placeholder-event.jpg'} alt={event.title} fill className="object-cover grayscale hover:grayscale-0 transition-all" />
+                    <Image src={event.media?.[0]?.url || event.image || event.flyer || '/placeholder-event.jpg'} alt={event.title} fill className="object-cover grayscale hover:grayscale-0 transition-all" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-bold text-white truncate mb-1">{event.title}</h4>
@@ -222,7 +281,18 @@ export default function Dashboard() {
                       <CheckCircle size={12} className="text-green-500" />
                       <span>Completed • {event.attendees} Guests</span>
                     </div>
-                    <button className="text-xs font-medium text-pink-500 hover:text-pink-400 mt-3">View Summary</button>
+                    <div className="flex gap-3 mt-3">
+                      <Link href={`/events/${event.slug || event._id || event.id}`} className="text-xs font-medium text-pink-500 hover:text-pink-400">
+                        View Summary
+                      </Link>
+                      <button 
+                        onClick={() => handleDeleteEvent(event._id || event.id || '', event.title)}
+                        disabled={deletingId === (event._id || event.id)}
+                        className="text-xs font-medium text-slate-500 hover:text-red-500 transition-colors disabled:opacity-50"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}

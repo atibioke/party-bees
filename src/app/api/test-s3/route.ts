@@ -4,7 +4,7 @@ import { S3Client, HeadBucketCommand, PutObjectCommand, GetObjectCommand } from 
 export async function GET() {
   try {
     const bucketName = process.env.AWS_BUCKET || process.env.AWS_S3_BUCKET;
-    const region = process.env.AWS_REGION;
+    const region = process.env.AWS_BUCKET_REGION || process.env.AWS_REGION;
     const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
     const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
 
@@ -77,7 +77,7 @@ export async function GET() {
         Key: testFileName,
         Body: Buffer.from(testContent),
         ContentType: 'text/plain',
-        // ACL removed - bucket has ACLs disabled
+        ACL: 'public-read', // Ensure file is public for test
       });
       await s3Client.send(putCommand);
     } catch (error: any) {

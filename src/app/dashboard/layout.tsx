@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { User, Calendar, LogOut, Menu, X, Plus } from "lucide-react";
+import { User, Calendar, LogOut, Menu, X, Plus, PartyPopperIcon } from "lucide-react";
 
 interface TabButtonProps {
     active: boolean;
@@ -82,7 +82,7 @@ export default function DashboardLayout({
             <div className="md:hidden fixed top-0 w-full z-30 bg-[#0F131D] border-b border-slate-800/60 px-4 py-3 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-lg shadow-lg shadow-pink-500/10 text-slate-900">
-
+                    <PartyPopperIcon size={20} />
                     </div>
                     <span className="text-lg font-bold text-white tracking-tight">Skiboh</span>
                 </Link>

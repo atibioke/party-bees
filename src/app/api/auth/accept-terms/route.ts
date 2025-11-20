@@ -51,6 +51,7 @@ export async function POST(req: NextRequest) {
       role: user.role,
       profileCompleted: user.profileCompleted,
       acceptedTerms: true,
+      isVerified: user.isVerified,
     });
 
     const response = NextResponse.json({

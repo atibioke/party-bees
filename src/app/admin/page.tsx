@@ -6,6 +6,7 @@ import { Menu, Users, Calendar, LogOut, Search, Ban, Star, Loader2 } from "lucid
 import Link from "next/link";
 import Image from "next/image";
 import { useToast } from "@/components/ui/Toast";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { PartyPopper } from "lucide-react";
 
 interface User {
@@ -41,6 +42,7 @@ interface Event {
 export default function AdminDashboard() {
   const router = useRouter();
   const { showToast } = useToast();
+  const { confirm } = useConfirm();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [searchTerm, setSearchTerm] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
@@ -221,7 +223,14 @@ export default function AdminDashboard() {
       ? `Are you sure you want to unban "${businessName}"? They will be able to access the platform again.`
       : `Are you sure you want to ban "${businessName}"? They will lose access to the platform and their events may be affected.`;
 
-    if (!confirm(confirmMessage)) {
+    const confirmed = await confirm({
+      title: currentlyBanned ? 'Unban User' : 'Ban User',
+      message: confirmMessage,
+      confirmText: currentlyBanned ? 'Unban' : 'Ban',
+      cancelText: 'Cancel'
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -249,7 +258,14 @@ export default function AdminDashboard() {
 
   // Delete event
   const handleDeleteEvent = async (eventId: string, eventTitle: string) => {
-    if (!confirm(`Are you sure you want to delete "${eventTitle}"? This action cannot be undone.`)) {
+    const confirmed = await confirm({
+      title: 'Delete Event',
+      message: `Are you sure you want to delete "${eventTitle}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel'
+    });
+
+    if (!confirmed) {
       return;
     }
 

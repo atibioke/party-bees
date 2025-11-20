@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/Input';
 import { useToast } from '@/components/ui/Toast';
 import { Loader2, PartyPopper } from 'lucide-react';
 import { UserMenu } from '@/components/UserMenu';
+import { validateNigerianPhone } from '@/utils/phone';
 
 export default function SignupPage() {
   const [form, setForm] = useState({
@@ -64,6 +65,16 @@ export default function SignupPage() {
       return;
     }
 
+    // Validate Nigerian phone number
+    const phoneValidation = validateNigerianPhone(form.whatsapp);
+    if (!phoneValidation.isValid) {
+      const errorMsg = phoneValidation.error || 'Invalid phone number';
+      setError(errorMsg);
+      showToast(errorMsg, 'error');
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
@@ -71,7 +82,7 @@ export default function SignupPage() {
         body: JSON.stringify({
           businessName: form.businessName,
           email: form.businessEmail,
-          whatsapp: form.whatsapp,
+          whatsapp: phoneValidation.formatted,
           password: form.password,
           acceptedTerms: form.acceptedTerms
         })
@@ -82,7 +93,7 @@ export default function SignupPage() {
       if (data.success) {
         showToast('Account created successfully!', 'success');
         setTimeout(() => {
-          router.push('/dashboard');
+          router.push('/verify-email');
         }, 500);
       } else {
         const errorMsg = data.error || 'Signup failed';
@@ -177,13 +188,25 @@ export default function SignupPage() {
                   onChange={e => setForm({ ...form, businessEmail: e.target.value })}
                 />
 
-                <Input
-                  label="WhatsApp Number"
-                  type="tel"
-                  placeholder="+234 800 000 0000"
-                  value={form.whatsapp}
-                  onChange={e => setForm({ ...form, whatsapp: e.target.value })}
-                />
+                <div>
+                  <label className="text-sm font-medium text-slate-300 mb-2 block">WhatsApp Number</label>
+                  <input
+                    type="tel"
+                    placeholder="+234 800 000 0000"
+                    value={form.whatsapp}
+                    onChange={e => {
+                      const value = e.target.value;
+                      setForm({ ...form, whatsapp: value });
+                    }}
+                    onBlur={e => {
+                      const validation = validateNigerianPhone(e.target.value);
+                      if (validation.isValid && validation.formatted) {
+                        setForm({ ...form, whatsapp: validation.formatted });
+                      }
+                    }}
+                    className="w-full bg-[#0B0F17] border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-pink-500 transition-colors"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

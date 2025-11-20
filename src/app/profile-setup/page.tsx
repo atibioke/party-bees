@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { PartyPopper } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { useToast } from '@/components/ui/Toast';
+import { validateNigerianPhone } from '@/utils/phone';
 
 export default function ProfileSetupPage() {
   const [form, setForm] = useState({ businessName: '', whatsapp: '' });
@@ -51,11 +52,22 @@ export default function ProfileSetupPage() {
       return;
     }
 
+    // Validate Nigerian phone number
+    const phoneValidation = validateNigerianPhone(form.whatsapp);
+    if (!phoneValidation.isValid) {
+      showToast(phoneValidation.error || 'Invalid phone number', 'error');
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch('/api/auth/complete-profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
+        body: JSON.stringify({
+          businessName: form.businessName,
+          whatsapp: phoneValidation.formatted
+        })
       });
 
       const data = await res.json();
@@ -134,14 +146,24 @@ export default function ProfileSetupPage() {
                 required
               />
 
-              <Input
-                label="WhatsApp Number"
-                type="tel"
-                placeholder="+234 800 000 0000"
-                value={form.whatsapp}
-                onChange={e => setForm({ ...form, whatsapp: e.target.value })}
-                required
-              />
+              <div>
+                <label className="text-sm font-medium text-slate-300 mb-2 block">WhatsApp Number</label>
+                <input
+                  type="tel"
+                  placeholder="+234 800 000 0000 or 0800 000 0000"
+                  value={form.whatsapp}
+                  onChange={e => setForm({ ...form, whatsapp: e.target.value })}
+                  onBlur={e => {
+                    const validation = validateNigerianPhone(e.target.value);
+                    if (validation.isValid && validation.formatted) {
+                      setForm({ ...form, whatsapp: validation.formatted });
+                    }
+                  }}
+                  className="w-full bg-[#0B0F17] border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-pink-500 transition-colors"
+                  required
+                />
+                <p className="text-xs text-slate-500 mt-1">Format: +234 800 000 0000 or 0800 000 0000</p>
+              </div>
 
               <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-xs text-blue-200/80 leading-relaxed">
                 <span className="font-bold text-blue-400 block mb-1">ℹ️ Why we need this</span>

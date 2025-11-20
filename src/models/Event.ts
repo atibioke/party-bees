@@ -23,6 +23,7 @@ export interface IEvent extends Document {
   price?: string;
   paymentDetails?: string;
   labels: string[];
+  category: string;
   isRecurring: boolean;
   recurringPattern?: string; // e.g., "weekly", "monthly", "daily"
   recurrenceInterval?: number; // e.g., every 2 weeks (default: 1)
@@ -71,6 +72,12 @@ const EventSchema: Schema = new Schema(
     price: { type: String },
     paymentDetails: { type: String },
     labels: { type: [String], default: [] },
+    category: { 
+      type: String, 
+      enum: ['Nightlife', 'Music', 'Luxury', 'Food & Drink', 'Networking', 'Arts & Culture', 'Sports', 'Other'],
+      required: true,
+      default: 'Other'
+    },
     isRecurring: { type: Boolean, default: false },
     recurringPattern: { type: String, enum: ['daily', 'weekly', 'monthly', 'yearly'], default: 'weekly' },
     recurrenceInterval: { type: Number, default: 1 }, // Every X days/weeks/months/years

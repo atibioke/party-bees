@@ -9,6 +9,7 @@ import statesData from "@/utils/states.json";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
 import MediaUploader from "@/components/MediaUploader";
+import { validateNigerianPhone } from "@/utils/phone";
 
 interface EventFormData {
     title: string;
@@ -27,6 +28,7 @@ interface EventFormData {
         order: number;
     }[];
     description: string;
+    category: string;
     isPaid: boolean;
     price: string;
     paymentDetails: string;
@@ -45,6 +47,8 @@ const VIBE_LABELS = [
     "Live Music 🎵", "Shisha Available 💨"
 ];
 
+const CATEGORIES = ['Nightlife', 'Music', 'Luxury', 'Food & Drink', 'Networking', 'Arts & Culture', 'Sports', 'Other'];
+
 export default function CreateEventPage() {
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState<EventFormData>({
@@ -60,6 +64,7 @@ export default function CreateEventPage() {
         flyer: "",
         media: [],
         description: "",
+        category: "",
         isPaid: false,
         price: "",
         paymentDetails: "",
@@ -71,8 +76,6 @@ export default function CreateEventPage() {
         recurrenceEndDate: null,
         recurrenceCount: 10,
     });
-
-    const [dragActive, setDragActive] = useState(false);
 
     // Fetch user profile and prefill form fields
     useEffect(() => {
@@ -100,6 +103,10 @@ export default function CreateEventPage() {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+        // Clear validation errors when user makes changes
+        if (validationErrors.length > 0) {
+            setValidationErrors([]);
+        }
     };
 
     const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -109,6 +116,10 @@ export default function CreateEventPage() {
             state: newState,
             lga: "" // Reset LGA when state changes
         }));
+        // Clear validation errors when user makes changes
+        if (validationErrors.length > 0) {
+            setValidationErrors([]);
+        }
     };
 
     const availableLgas = React.useMemo(() => {
@@ -123,15 +134,148 @@ export default function CreateEventPage() {
         }));
     };
 
-    const nextStep = () => setStep(prev => Math.min(prev + 1, 3));
-    const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
+    // Validation functions for each step
+    const validateStep1 = (): { isValid: boolean; errors: string[] } => {
+        const errors: string[] = [];
+        
+        if (!formData.title.trim()) {
+            errors.push('Event title is required');
+        }
+        if (!formData.category) {
+            errors.push('Category is required');
+        }
+        if (!formData.startDateTime) {
+            errors.push('Start date and time is required');
+        }
+        if (!formData.endDateTime) {
+            errors.push('End date and time is required');
+        }
+        if (formData.startDateTime && formData.endDateTime && formData.endDateTime <= formData.startDateTime) {
+            errors.push('End date must be after start date');
+        }
+        if (!formData.state) {
+            errors.push('State is required');
+        }
+        if (!formData.lga) {
+            errors.push('LGA/City is required');
+        }
+        if (!formData.address.trim()) {
+            errors.push('Address is required');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateStep2 = (): { isValid: boolean; errors: string[] } => {
+        const errors: string[] = [];
+        
+        if (!formData.description.trim()) {
+            errors.push('Description is required');
+        }
+        if (!formData.host.trim()) {
+            errors.push('Organizer name is required');
+        }
+        if (!formData.organizerPhone.trim()) {
+            errors.push('Phone/WhatsApp is required');
+        } else {
+            const phoneValidation = validateNigerianPhone(formData.organizerPhone);
+            if (!phoneValidation.isValid) {
+                errors.push(phoneValidation.error || 'Invalid phone number');
+            }
+        }
+        if (!formData.organizerEmail.trim()) {
+            errors.push('Email is required');
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.organizerEmail)) {
+            errors.push('Please enter a valid email address');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateStep3 = (): { isValid: boolean; errors: string[] } => {
+        const errors: string[] = [];
+        
+        if (formData.isPaid && !formData.price.trim()) {
+            errors.push('Price is required for paid events');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const [validationErrors, setValidationErrors] = useState<string[]>([]);
+
+    const nextStep = () => {
+        let validation: { isValid: boolean; errors: string[] };
+        
+        if (step === 1) {
+            validation = validateStep1();
+        } else if (step === 2) {
+            validation = validateStep2();
+        } else {
+            validation = { isValid: true, errors: [] };
+        }
+        
+        if (validation.isValid) {
+            setValidationErrors([]);
+            setStep(prev => Math.min(prev + 1, 3));
+        } else {
+            setValidationErrors(validation.errors);
+            showToast(validation.errors[0] || 'Please fill in all required fields', 'error');
+        }
+    };
+    
+    const prevStep = () => {
+        setValidationErrors([]);
+        setStep(prev => Math.max(prev - 1, 1));
+    };
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [canSubmit, setCanSubmit] = useState(false); // Prevent accidental double-click submits
     const router = useRouter();
     const { showToast } = useToast();
 
+    // Prevent immediate submission when landing on step 3 (fixes double-click issue)
+    useEffect(() => {
+        if (step === 3) {
+            setCanSubmit(false);
+            const timer = setTimeout(() => setCanSubmit(true), 1000);
+            return () => clearTimeout(timer);
+        } else {
+            setCanSubmit(false);
+        }
+    }, [step]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // If not on the last step, treat Enter key as "Next"
+        if (step < 3) {
+            nextStep();
+            return;
+        }
+
+        // Prevent submission if button isn't ready (double-click protection)
+        if (!canSubmit) {
+            return;
+        }
+        
+        // Validate step 3 before submitting
+        const validation = validateStep3();
+        if (!validation.isValid) {
+            setValidationErrors(validation.errors);
+            showToast(validation.errors[0] || 'Please fill in all required fields', 'error');
+            return;
+        }
+        
+        // Format phone number before submission
+        const phoneValidation = validateNigerianPhone(formData.organizerPhone);
+        if (!phoneValidation.isValid) {
+            setValidationErrors([phoneValidation.error || 'Invalid phone number']);
+            showToast(phoneValidation.error || 'Invalid phone number', 'error');
+            setIsSubmitting(false);
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             const res = await fetch('/api/events', {
@@ -139,7 +283,10 @@ export default function CreateEventPage() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify({
+                    ...formData,
+                    organizerPhone: phoneValidation.formatted
+                }),
             });
 
             const data = await res.json();
@@ -158,22 +305,6 @@ export default function CreateEventPage() {
         } finally {
             setIsSubmitting(false);
         }
-    };
-
-    const handleDrag = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (e.type === "dragenter" || e.type === "dragover") {
-            setDragActive(true);
-        } else if (e.type === "dragleave") {
-            setDragActive(false);
-        }
-    };
-
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setDragActive(false);
     };
 
     return (
@@ -199,6 +330,18 @@ export default function CreateEventPage() {
 
                 <form onSubmit={handleSubmit} className="p-5 md:p-10">
 
+                    {/* Validation Errors */}
+                    {validationErrors.length > 0 && (
+                        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+                            <p className="text-red-400 font-semibold text-sm mb-2">Please fix the following errors:</p>
+                            <ul className="list-disc list-inside space-y-1">
+                                {validationErrors.map((error, index) => (
+                                    <li key={index} className="text-red-300 text-sm">{error}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
                     {/* Step 1: Basics */}
                     {step === 1 && (
                         <div className="space-y-6">
@@ -218,12 +361,34 @@ export default function CreateEventPage() {
                                     autoFocus
                                 />
 
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Category</label>
+                                    <select
+                                        name="category"
+                                        value={formData.category}
+                                        onChange={handleChange}
+                                        className="w-full bg-[#0B0F17] border border-slate-800 rounded-xl px-3 py-2.5 md:px-4 md:py-3 text-white text-sm focus:outline-none focus:border-white/30 transition-colors appearance-none"
+                                    >
+                                        <option value="">Select Category</option>
+                                        {CATEGORIES.map((cat) => (
+                                            <option key={cat} value={cat}>
+                                                {cat}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Start</label>
                                         <DatePicker
                                             selected={formData.startDateTime}
-                                            onChange={(date) => setFormData(prev => ({ ...prev, startDateTime: date }))}
+                                            onChange={(date) => {
+                                                setFormData(prev => ({ ...prev, startDateTime: date }));
+                                                if (validationErrors.length > 0) {
+                                                    setValidationErrors([]);
+                                                }
+                                            }}
                                             showTimeSelect
                                             timeIntervals={15}
                                             dateFormat="MMM d, yyyy h:mm aa"
@@ -237,7 +402,12 @@ export default function CreateEventPage() {
                                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">End</label>
                                         <DatePicker
                                             selected={formData.endDateTime}
-                                            onChange={(date) => setFormData(prev => ({ ...prev, endDateTime: date }))}
+                                            onChange={(date) => {
+                                                setFormData(prev => ({ ...prev, endDateTime: date }));
+                                                if (validationErrors.length > 0) {
+                                                    setValidationErrors([]);
+                                                }
+                                            }}
                                             showTimeSelect
                                             timeIntervals={15}
                                             dateFormat="MMM d, yyyy h:mm aa"
@@ -394,14 +564,24 @@ export default function CreateEventPage() {
                                             placeholder="e.g. Party Kings"
                                             className="bg-[#0B0F17] border-slate-800"
                                         />
-                                        <Input
-                                            label="Phone / WhatsApp"
-                                            name="organizerPhone"
-                                            value={formData.organizerPhone}
-                                            onChange={handleChange}
-                                            placeholder="+234..."
-                                            className="bg-[#0B0F17] border-slate-800"
-                                        />
+                                        <div>
+                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Phone / WhatsApp</label>
+                                            <input
+                                                type="tel"
+                                                name="organizerPhone"
+                                                value={formData.organizerPhone}
+                                                onChange={handleChange}
+                                                onBlur={e => {
+                                                    const validation = validateNigerianPhone(e.target.value);
+                                                    if (validation.isValid && validation.formatted) {
+                                                        setFormData(prev => ({ ...prev, organizerPhone: validation.formatted! }));
+                                                    }
+                                                }}
+                                                placeholder="+234 800 000 0000 or 0800 000 0000"
+                                                className="w-full bg-[#0B0F17] border border-slate-800 rounded-xl px-3 py-2.5 md:px-4 md:py-3 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+                                            />
+                                            <p className="text-xs text-slate-500 mt-1">Format: +234 800 000 0000 or 0800 000 0000</p>
+                                        </div>
                                     </div>
                                     <Input
                                         label="Email"
@@ -446,7 +626,12 @@ export default function CreateEventPage() {
                                     <div className="bg-[#0B0F17] border border-slate-800 rounded-xl p-1 flex">
                                         <button
                                             type="button"
-                                            onClick={() => setFormData(prev => ({ ...prev, isPaid: false }))}
+                                            onClick={() => {
+                                                setFormData(prev => ({ ...prev, isPaid: false }));
+                                                if (validationErrors.length > 0) {
+                                                    setValidationErrors([]);
+                                                }
+                                            }}
                                             className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${!formData.isPaid ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-300'
                                                 }`}
                                         >
@@ -454,7 +639,12 @@ export default function CreateEventPage() {
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={() => setFormData(prev => ({ ...prev, isPaid: true }))}
+                                            onClick={() => {
+                                                setFormData(prev => ({ ...prev, isPaid: true }));
+                                                if (validationErrors.length > 0) {
+                                                    setValidationErrors([]);
+                                                }
+                                            }}
                                             className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${formData.isPaid ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-300'
                                                 }`}
                                         >
@@ -508,7 +698,7 @@ export default function CreateEventPage() {
                         ) : (
                             <button
                                 type="submit"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || !canSubmit}
                                 className="flex items-center gap-2 bg-white text-slate-900 px-6 py-2.5 md:px-8 md:py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors shadow-lg text-sm md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isSubmitting ? "Publishing..." : (

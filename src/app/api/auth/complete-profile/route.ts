@@ -3,6 +3,7 @@ import dbConnect from '@/lib/db';
 import User from '@/models/User';
 import { verifyJWT, signJWT } from '@/lib/auth';
 import { cookies } from 'next/headers';
+import { validateNigerianPhone } from '@/utils/phone';
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,6 +35,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Validate Nigerian phone number
+    const phoneValidation = validateNigerianPhone(whatsapp);
+    if (!phoneValidation.isValid) {
+      return NextResponse.json(
+        { success: false, error: phoneValidation.error || 'Invalid phone number' },
+        { status: 400 }
+      );
+    }
+
     await dbConnect();
 
     // Update user's profile
@@ -41,7 +51,7 @@ export async function POST(req: NextRequest) {
       payload.userId,
       {
         businessName,
-        whatsapp,
+        whatsapp: phoneValidation.formatted!,
         profileCompleted: true,
       },
       { new: true }
@@ -61,6 +71,7 @@ export async function POST(req: NextRequest) {
       role: updatedUser.role,
       profileCompleted: true,
       acceptedTerms: updatedUser.acceptedTerms,
+      isVerified: updatedUser.isVerified,
     });
 
     const response = NextResponse.json({

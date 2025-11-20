@@ -49,6 +49,11 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/terms-acceptance', request.url));
     }
 
+    // Check if user needs to verify email
+    if (!payload.isVerified && !pathname.startsWith('/verify-email')) {
+      return NextResponse.redirect(new URL('/verify-email', request.url));
+    }
+
     // Check if user needs to complete profile
     if (!payload.profileCompleted) {
       return NextResponse.redirect(new URL('/profile-setup', request.url));

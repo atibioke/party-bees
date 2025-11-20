@@ -4,6 +4,7 @@ import Event from '@/models/Event';
 import { cookies } from 'next/headers';
 import { verifyJWT } from '@/lib/auth';
 import { getNextOccurrence } from '@/lib/recurringEvents';
+import { validateNigerianPhone } from '@/utils/phone';
 
 export async function POST(req: Request) {
   try {
@@ -54,6 +55,18 @@ export async function POST(req: Request) {
       body.slug = slug;
     }
     
+    // Validate organizer phone number if provided
+    if (body.organizerPhone) {
+      const phoneValidation = validateNigerianPhone(body.organizerPhone);
+      if (!phoneValidation.isValid) {
+        return NextResponse.json(
+          { success: false, error: phoneValidation.error || 'Invalid phone number' },
+          { status: 400 }
+        );
+      }
+      body.organizerPhone = phoneValidation.formatted;
+    }
+
     // Assign hostId from token - ensure it's a string
     const hostId = typeof payload.userId === 'string' 
       ? payload.userId 

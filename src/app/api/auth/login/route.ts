@@ -33,7 +33,8 @@ export async function POST(req: Request) {
       email: user.email, 
       role: user.role,
       profileCompleted: user.profileCompleted,
-      acceptedTerms: user.acceptedTerms
+      acceptedTerms: user.acceptedTerms,
+      isVerified: user.isVerified
     });
 
     const cookieStore = await cookies();

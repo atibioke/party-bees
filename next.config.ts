@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'i.pravatar.cc',
       },
+      {
+        protocol: 'https',
+        hostname: 'skiboh.s3.us-west-2.amazonaws.com',
+      },
     ],
   },
 };
