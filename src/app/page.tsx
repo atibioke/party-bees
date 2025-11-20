@@ -97,7 +97,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-pink-500 rounded-xl flex items-center justify-center text-2xl shadow-lg shadow-pink-500/20">
-              🐝
+              
             </div>
             <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
               Skiboh
@@ -347,7 +347,7 @@ export default function LandingPage() {
               Join thousands of event organizers across Nigeria and create unforgettable experiences.
             </p>
             <Link href="/dashboard/event/new">
-              <Button variant="primary" size="lg" className="text-lg px-8 py-4">
+              <Button variant="primary" className="text-lg px-8 py-4">
                 Create Your Event
               </Button>
             </Link>
@@ -362,7 +362,7 @@ export default function LandingPage() {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-pink-500 rounded-lg flex items-center justify-center text-xl">
-                  🐝
+                  
                 </div>
                 <span className="text-xl font-bold text-white">Skiboh</span>
               </div>

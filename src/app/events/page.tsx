@@ -2,16 +2,17 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import {
   Search,
   MapPin,
   Calendar,
   Filter,
-  Menu,
   Music
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { UserMenu } from '@/components/UserMenu';
 import statesData from '@/utils/states.json';
 import { format } from 'date-fns';
 
@@ -182,7 +183,7 @@ export default function EventsPage() {
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2 group">
               <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-lg shadow-lg shadow-pink-500/10 text-slate-900">
-                🐝
+                
               </div>
               <span className="text-xl font-bold text-white hidden md:block">Skiboh</span>
             </Link>
@@ -201,14 +202,10 @@ export default function EventsPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <Link href="/dashboard/event/new">
-              <Button className="hidden md:flex py-2.5 px-6 text-sm shadow-pink-500/20">Host a Party</Button>
+            <Link href="/dashboard/event/new" className="hidden md:block">
+              <Button className="py-2.5 px-6 text-sm shadow-pink-500/20">Host a Party</Button>
             </Link>
-            <Link href="/dashboard">
-              <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-500 transition-all">
-                <Menu size={20} />
-              </div>
-            </Link>
+            <UserMenu />
           </div>
         </div>
 
@@ -363,10 +360,12 @@ export default function EventsPage() {
 
                       {/* Image */}
                       <div className="h-48 relative overflow-hidden">
-                        <img
+                        <Image
                           src={event.flyer || event.image || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80"}
                           alt={event.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          fill
+                          className="object-cover transition-transform duration-700 group-hover:scale-110"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         />
                         {event.category && (
                           <div className="absolute top-4 left-4 bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-white border border-slate-800">

@@ -23,7 +23,7 @@ export default function GradientDashboard() {
             className="flex items-center gap-3 group"
           >
             <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-pink-500 rounded-lg flex items-center justify-center text-lg shadow-lg group-hover:shadow-pink-500/20 transition-all">
-              🐝
+              
             </div>
             <span className="font-bold text-white text-lg tracking-tight">Skiboh</span>
           </Link>

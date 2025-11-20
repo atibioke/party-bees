@@ -19,9 +19,16 @@ export async function GET() {
     }
 
     await dbConnect();
-    const user = await User.findById(payload.userId).select('-password'); // Exclude password
+    
+    // Ensure userId is a string (it might be an ObjectId or string)
+    const userId = typeof payload.userId === 'string' 
+      ? payload.userId 
+      : String(payload.userId);
+    
+    const user = await User.findById(userId).select('-password'); // Exclude password
 
     if (!user) {
+      console.error('User not found for userId:', userId, 'Payload:', payload);
       return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
     }
 

@@ -7,6 +7,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import statesData from "@/utils/states.json";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/Toast";
 
 interface EventFormData {
     title: string;
@@ -97,6 +98,7 @@ export default function CreateEventPage() {
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const router = useRouter();
+    const { showToast } = useToast();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -110,14 +112,19 @@ export default function CreateEventPage() {
                 body: JSON.stringify(formData),
             });
 
-            if (res.ok) {
-                router.push('/dashboard');
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                showToast('Event created successfully!', 'success');
+                setTimeout(() => {
+                    router.push('/dashboard');
+                }, 500);
             } else {
-                console.error("Failed to create event");
-                // Handle error (e.g., show toast)
+                showToast(data.error || 'Failed to create event. Please try again.', 'error');
             }
         } catch (error) {
             console.error("An error occurred", error);
+            showToast('An unexpected error occurred. Please try again.', 'error');
         } finally {
             setIsSubmitting(false);
         }

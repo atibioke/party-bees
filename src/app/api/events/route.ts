@@ -46,8 +46,11 @@ export async function POST(req: Request) {
       body.slug = slug;
     }
     
-    // Assign hostId from token
-    const event = await Event.create({ ...body, hostId: payload.userId });
+    // Assign hostId from token - ensure it's a string
+    const hostId = typeof payload.userId === 'string' 
+      ? payload.userId 
+      : String(payload.userId);
+    const event = await Event.create({ ...body, hostId });
     
     return NextResponse.json({ success: true, data: event }, { status: 201 });
   } catch (error) {

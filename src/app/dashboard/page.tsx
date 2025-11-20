@@ -39,7 +39,7 @@ export default function Dashboard() {
           setProfile(userData.data);
 
           // Fetch user's events
-          const eventsRes = await fetch(`/api/events?hostId=${userData.data._id}`);
+          const eventsRes = await fetch(`/api/events?hostId=${userData.data._id}&includePast=true`);
           const eventsData = await eventsRes.json();
 
           if (eventsData.success) {
@@ -55,10 +55,6 @@ export default function Dashboard() {
 
     fetchData();
   }, []);
-
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center text-white">Loading dashboard...</div>;
-  }
 
   const upcomingEvents = events.filter(e => new Date(e.startDateTime) > new Date());
   const pastEvents = events.filter(e => new Date(e.startDateTime) <= new Date());
@@ -90,6 +86,22 @@ export default function Dashboard() {
         )}
       </div>
 
+      {loading && (
+        <div className="space-y-6">
+          {/* Skeleton loaders for events */}
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-[#131722] border border-slate-800/60 rounded-2xl p-4 flex flex-col md:flex-row gap-6 animate-pulse">
+              <div className="w-full md:w-64 h-48 md:h-40 bg-slate-800 rounded-xl"></div>
+              <div className="flex-1 space-y-4">
+                <div className="h-6 bg-slate-800 rounded w-3/4"></div>
+                <div className="h-4 bg-slate-800 rounded w-1/2"></div>
+                <div className="h-4 bg-slate-800 rounded w-2/3"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Tabs Navigation (Visible only on mobile/tablet inside content area if needed, but we have sidebar now) */}
       {/* For simplicity, let's keep a sub-nav for switching views within the dashboard page itself */}
       <div className="flex gap-2 mb-8 overflow-x-auto pb-2 md:hidden">
@@ -113,6 +125,8 @@ export default function Dashboard() {
         </button>
       </div>
 
+      {!loading && (
+        <>
       {/* Tab Content: Upcoming */}
       {activeTab === "upcoming" && (
         <div className="space-y-6">
@@ -265,6 +279,8 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
     </>
   );

@@ -29,7 +29,12 @@ export async function POST(req: Request) {
     });
 
     // Create session immediately after signup
-    const token = await signJWT({ userId: user._id, email: user.email, role: user.role });
+    // Convert ObjectId to string for JWT payload
+    const token = await signJWT({ 
+      userId: user._id.toString(), 
+      email: user.email, 
+      role: user.role 
+    });
     
     const cookieStore = await cookies();
     cookieStore.set('token', token, {

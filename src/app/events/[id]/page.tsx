@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   CalendarDays,
   MapPin,
@@ -12,11 +13,11 @@ import {
   Star,
   Eye,
   Lock,
-  Menu,
   Phone,
   MessageCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { UserMenu } from '@/components/UserMenu';
 
 type Attendee = { name: string; avatarUrl?: string };
 
@@ -251,24 +252,20 @@ export default function EventDetailsPage() {
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2 group">
               <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-lg shadow-lg shadow-pink-500/10 text-slate-900">
-                🐝
+                
               </div>
               <span className="text-xl font-bold text-white hidden md:block">Skiboh</span>
             </Link>
           </div>
 
           <div className="flex items-center gap-4">
-            <Link href="/events">
-              <Button className="hidden md:flex py-2.5 px-6 text-sm shadow-pink-500/20">Browse Events</Button>
+            <Link href="/events" className="hidden md:block">
+              <Button className="py-2.5 px-6 text-sm shadow-pink-500/20">Browse Events</Button>
             </Link>
-            <Link href="/dashboard/event/new">
-              <Button className="hidden md:flex py-2.5 px-6 text-sm shadow-pink-500/20">Host a Party</Button>
+            <Link href="/dashboard/event/new" className="hidden md:block">
+              <Button className="py-2.5 px-6 text-sm shadow-pink-500/20">Host a Party</Button>
             </Link>
-            <Link href="/dashboard">
-              <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-500 transition-all">
-                <Menu size={20} />
-              </div>
-            </Link>
+            <UserMenu />
           </div>
         </div>
       </header>
@@ -294,11 +291,12 @@ export default function EventDetailsPage() {
         <div className="grid lg:grid-cols-2 gap-8 bg-slate-900/50 backdrop-blur-xl border border-slate-800 shadow-2xl rounded-3xl overflow-hidden">
           {/* Flyer */}
           <div className="relative h-[400px] lg:h-auto group overflow-hidden">
-            <img
+            <Image
               src={event.flyer}
               alt={event.title}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              loading="lazy"
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60"></div>
             

@@ -15,7 +15,7 @@ export default function ProfileSetupPage() {
       <div className="w-full max-w-md relative z-10 bg-white/90 rounded-3xl shadow-2xl overflow-hidden">
         {/* Gradient header */}
         <div className="h-32 bg-gradient-to-r from-yellow-400 to-pink-500 flex items-center justify-center">
-          <span className="text-3xl font-bold text-white">🐝 Skiboh</span>
+          <span className="text-3xl font-bold text-white">Skiboh</span>
         </div>
 
         <div className="p-8 space-y-6">

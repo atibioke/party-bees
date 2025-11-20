@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { User, Calendar, LogOut, Menu, X, Plus } from "lucide-react";
 
@@ -33,7 +32,8 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [profile, setProfile] = useState<{ businessName?: string; email?: string; avatar?: string } | null>(null);
+    const [profile, setProfile] = useState<{ businessName?: string; email?: string; _id?: string } | null>(null);
+    const [isLoadingProfile, setIsLoadingProfile] = useState(true);
     const pathname = usePathname();
     const router = useRouter();
 
@@ -42,15 +42,29 @@ export default function DashboardLayout({
             try {
                 const res = await fetch('/api/auth/me');
                 const data = await res.json();
-                if (data.success) {
+                
+                // Only redirect on authentication errors (401, 403)
+                if (res.status === 401 || res.status === 403) {
+                    router.push('/login');
+                    return;
+                }
+                
+                if (data.success && data.data) {
                     setProfile(data.data);
+                } else if (res.status >= 400) {
+                    // Only redirect on client/server errors, not on network issues
+                    console.error("Failed to fetch profile:", data.error || 'Unknown error');
+                    // Don't redirect immediately - let the user see the error or retry
                 }
             } catch (error) {
                 console.error("Failed to fetch profile", error);
+                // Don't redirect on network errors - might be temporary
+            } finally {
+                setIsLoadingProfile(false);
             }
         };
         fetchProfile();
-    }, []);
+    }, [router]);
 
     const handleLogout = async () => {
         try {
@@ -68,7 +82,7 @@ export default function DashboardLayout({
             <div className="md:hidden fixed top-0 w-full z-30 bg-[#0F131D] border-b border-slate-800/60 px-4 py-3 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-lg shadow-lg shadow-pink-500/10 text-slate-900">
-                        🐝
+                        
                     </div>
                     <span className="text-lg font-bold text-white tracking-tight">Skiboh</span>
                 </Link>
@@ -89,23 +103,26 @@ export default function DashboardLayout({
                 <div className="p-6 h-full flex flex-col">
                     <Link href="/" className="hidden md:flex items-center gap-3 mb-10">
                         <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center text-xl shadow-lg shadow-pink-500/10 text-slate-900">
-                            🐝
+                            
                         </div>
                         <span className="text-lg font-bold text-white tracking-tight">Skiboh</span>
                     </Link>
 
                     <div className="mb-8">
-                        <div className="w-16 h-16 rounded-full border-2 border-slate-800 overflow-hidden mb-3 relative">
-                            {profile?.avatar ? (
-                                <Image src={profile.avatar} alt="Profile" fill className="object-cover" />
-                            ) : (
-                                <div className="w-full h-full bg-slate-800 flex items-center justify-center text-slate-500">
-                                    <User size={24} />
-                                </div>
-                            )}
+                        <div className="w-16 h-16 rounded-full border-2 border-slate-800 overflow-hidden mb-3 relative bg-slate-800 flex items-center justify-center">
+                            <User size={24} className="text-slate-500" />
                         </div>
-                        <h3 className="font-bold text-white">{profile?.businessName || 'Loading...'}</h3>
-                        <p className="text-sm text-slate-500">@{profile?.businessName?.toLowerCase().replace(/\s+/g, '_') || 'user'}</p>
+                        {isLoadingProfile ? (
+                            <div className="space-y-2">
+                                <div className="h-5 bg-slate-800 rounded animate-pulse w-24"></div>
+                                <div className="h-4 bg-slate-800 rounded w-16 animate-pulse"></div>
+                            </div>
+                        ) : (
+                            <>
+                                <h3 className="font-bold text-white">{profile?.businessName || 'User'}</h3>
+                                <p className="text-sm text-slate-500">@{profile?.businessName?.toLowerCase().replace(/\s+/g, '_') || profile?.email?.split('@')[0] || 'user'}</p>
+                            </>
+                        )}
                     </div>
 
                     <nav className="space-y-1">

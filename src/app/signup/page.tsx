@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
 import { Input } from '@/components/ui/Input';
+import { useToast } from '@/components/ui/Toast';
 
 export default function SignupPage() {
   const [form, setForm] = useState({
@@ -17,6 +18,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const { showToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +26,9 @@ export default function SignupPage() {
     setLoading(true);
 
     if (form.password !== form.confirm) {
-      setError("Passwords don't match");
+      const errorMsg = "Passwords don't match";
+      setError(errorMsg);
+      showToast(errorMsg, 'error');
       setLoading(false);
       return;
     }
@@ -44,12 +48,19 @@ export default function SignupPage() {
       const data = await res.json();
 
       if (data.success) {
-        router.push('/dashboard');
+        showToast('Account created successfully!', 'success');
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 500);
       } else {
-        setError(data.error || 'Signup failed');
+        const errorMsg = data.error || 'Signup failed';
+        setError(errorMsg);
+        showToast(errorMsg, 'error');
       }
     } catch {
-      setError('An error occurred. Please try again.');
+      const errorMsg = 'An error occurred. Please try again.';
+      setError(errorMsg);
+      showToast(errorMsg, 'error');
     } finally {
       setLoading(false);
     }
@@ -68,7 +79,7 @@ export default function SignupPage() {
         {/* Gradient header */}
         <div className="h-32 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-600 flex flex-col items-center justify-center relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-          <div className="text-4xl mb-2 animate-bounce">🐝</div>
+          <div className="text-4xl mb-2 animate-bounce">🍯</div>
           <span className="text-2xl font-bold text-white tracking-tight">Skiboh</span>
         </div>
 

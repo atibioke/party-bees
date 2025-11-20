@@ -7,6 +7,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import statesData from "@/utils/states.json";
 import { useParams, useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/Toast";
 
 interface EventFormData {
     title: string;
@@ -133,6 +134,7 @@ export default function EditEventPage() {
     const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { showToast } = useToast();
 
     const saveEvent = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
@@ -146,13 +148,19 @@ export default function EditEventPage() {
                 body: JSON.stringify(formData),
             });
 
-            if (res.ok) {
-                router.push('/dashboard');
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                showToast('Event updated successfully!', 'success');
+                setTimeout(() => {
+                    router.push('/dashboard');
+                }, 500);
             } else {
-                console.error("Failed to update event");
+                showToast(data.error || 'Failed to update event. Please try again.', 'error');
             }
         } catch (error) {
             console.error("Error updating event:", error);
+            showToast('An unexpected error occurred. Please try again.', 'error');
         } finally {
             setIsSubmitting(false);
         }
@@ -175,7 +183,19 @@ export default function EditEventPage() {
     };
 
     if (loading) {
-        return <div className="text-white text-center py-20">Loading event details...</div>;
+        return (
+            <div className="space-y-6 animate-pulse">
+                <div className="h-8 bg-slate-800 rounded w-1/3 mb-4"></div>
+                <div className="bg-[#131722] border border-slate-800 rounded-3xl p-10 space-y-6">
+                    <div className="h-6 bg-slate-800 rounded w-1/2"></div>
+                    <div className="space-y-4">
+                        <div className="h-12 bg-slate-800 rounded"></div>
+                        <div className="h-12 bg-slate-800 rounded"></div>
+                        <div className="h-32 bg-slate-800 rounded"></div>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     return (

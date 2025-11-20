@@ -3,9 +3,6 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -85,6 +82,10 @@ body {
   width: 100% !important;
 }
 
+.react-datepicker-time__header {
+  color: #fff !important;
+}
+
 .react-datepicker__time-list-item {
   color: #cbd5e1 !important;
 }
@@ -143,4 +144,13 @@ body {
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: #64748b;
+}
+
+/* Button cursor pointer */
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
 }
