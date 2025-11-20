@@ -6,6 +6,7 @@ export interface IUser extends Document {
   whatsapp: string;
   password?: string; // Optional because we might exclude it in queries
   role: 'organizer' | 'admin';
+  banned: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -17,6 +18,7 @@ const UserSchema: Schema = new Schema(
     whatsapp: { type: String, required: true },
     password: { type: String, required: true },
     role: { type: String, enum: ['organizer', 'admin'], default: 'organizer' },
+    banned: { type: Boolean, default: false },
   },
   {
     timestamps: true,

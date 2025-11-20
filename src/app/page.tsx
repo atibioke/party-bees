@@ -12,11 +12,11 @@ import {
   Music,
   ShieldCheck,
   Zap,
-  Menu,
-  X,
-  ChevronRight
+  ChevronRight,
+  PartyPopper
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { UserMenu } from '@/components/UserMenu';
 
 
 // Event type for trending events
@@ -47,7 +47,6 @@ const categories = [
 export default function LandingPage() {
   const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [trendingEvents, setTrendingEvents] = useState<TrendingEvent[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
@@ -97,9 +96,9 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-pink-500 rounded-xl flex items-center justify-center text-2xl shadow-lg shadow-pink-500/20">
-              
+            <PartyPopper size={24} />
             </div>
-            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 cursor-pointer">
               Skiboh
             </span>
           </div>
@@ -108,36 +107,14 @@ export default function LandingPage() {
           <div className="hidden md:flex items-center gap-8">
             <Link href="/events" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">Find Events</Link>
             <Link href="/about" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">About</Link>
-            <div className="flex items-center gap-4">
-              <Link href="/login" className="text-sm font-medium text-white hover:text-pink-400 transition-colors">Login</Link>
-              <Link href="/signup">
-                <Button variant="primary" className="py-2 px-6 text-sm">Sign Up</Button>
-              </Link>
-            </div>
+            <UserMenu />
           </div>
 
-          {/* Mobile Menu Toggle */}
-          <button
-            className="md:hidden p-2 text-slate-300 hover:text-white"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          {/* Mobile Menu - Use UserMenu which handles mobile menu internally */}
+          <div className="md:hidden">
+            <UserMenu />
+          </div>
         </div>
-
-        {/* Mobile Nav Dropdown */}
-        {mobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 w-full bg-slate-900 border-b border-slate-800 p-4 flex flex-col gap-4 shadow-2xl">
-            <Link href="/events" className="text-slate-300 hover:text-white py-2 block">Find Events</Link>
-            <Link href="/dashboard/event/new" className="text-slate-300 hover:text-white py-2 block">Host a Party</Link>
-            <Link href="/about" className="text-slate-300 hover:text-white py-2 block">About Us</Link>
-            <div className="h-px bg-slate-800 my-2"></div>
-            <Link href="/login" className="text-slate-300 hover:text-white py-2 block">Login</Link>
-            <Link href="/signup" className="w-full block">
-              <Button variant="primary" className="w-full justify-center">Sign Up</Button>
-            </Link>
-          </div>
-        )}
       </nav>
 
 
@@ -151,11 +128,11 @@ export default function LandingPage() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-4xl mx-auto space-y-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-pink-400 text-xs font-bold uppercase tracking-wider shadow-sm animate-fade-in-up">
+            <div style={{ transform: 'rotate(-4deg)'}} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-pink-400 text-xs font-bold uppercase tracking-wider shadow-sm animate-fade-in-up">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
-              </span>
+               </span>
               The #1 Party Platform
             </div>
 

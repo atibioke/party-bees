@@ -14,7 +14,8 @@ import {
   Eye,
   Lock,
   Phone,
-  MessageCircle
+  MessageCircle,
+  PartyPopper
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { UserMenu } from '@/components/UserMenu';
@@ -252,7 +253,7 @@ export default function EventDetailsPage() {
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2 group">
               <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-lg shadow-lg shadow-pink-500/10 text-slate-900">
-                
+              <PartyPopper size={24} />
               </div>
               <span className="text-xl font-bold text-white hidden md:block">Skiboh</span>
             </Link>

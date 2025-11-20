@@ -403,6 +403,28 @@ export async function GET() {
 
     console.log('Starting seed...');
 
+    // Create admin user first (if it doesn't exist)
+    const adminEmail = 'admin@skiboh.com';
+    let adminUser = await User.findOne({ email: adminEmail });
+    if (!adminUser) {
+      const adminPassword = await bcrypt.hash('password123', 10);
+      adminUser = await User.create({
+        businessName: 'Skiboh Admin',
+        email: adminEmail,
+        whatsapp: '+2348000000000',
+        password: adminPassword,
+        role: 'admin',
+        banned: false
+      });
+      console.log(`Created admin user: ${adminEmail}`);
+    } else {
+      // Update existing admin user to ensure it has admin role
+      adminUser.role = 'admin';
+      adminUser.banned = false;
+      await adminUser.save();
+      console.log(`Updated existing admin user: ${adminEmail}`);
+    }
+
     // Create users
     const users = [];
     for (const organizer of ORGANIZERS) {

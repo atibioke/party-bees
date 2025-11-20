@@ -2,10 +2,12 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FcGoogle } from 'react-icons/fc';
 import { Input } from '@/components/ui/Input';
 import { useToast } from '@/components/ui/Toast';
+import { PartyPopper } from 'lucide-react';
+import { UserMenu } from '@/components/UserMenu';
 
 export default function SignupPage() {
   const [form, setForm] = useState({
@@ -17,8 +19,28 @@ export default function SignupPage() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const router = useRouter();
   const { showToast } = useToast();
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('/api/auth/me');
+        const data = await res.json();
+        if (data.success && data.data) {
+          // User is already logged in, redirect to dashboard
+          router.push('/dashboard');
+        }
+      } catch {
+        // Not logged in, continue showing signup page
+      } finally {
+        setCheckingAuth(false);
+      }
+    };
+    checkAuth();
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,19 +89,40 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="relative min-h-screen flex items-center justify-center bg-slate-950 text-white overflow-hidden py-10">
-      {/* Background blobs */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-pink-600/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 -right-32 w-96 h-96 bg-yellow-600/10 rounded-full blur-3xl animate-pulse" />
-      </div>
+    <main className="relative min-h-screen flex flex-col bg-slate-950 text-white overflow-hidden">
+      {/* Navigation */}
+      <header className="fixed top-0 w-full z-50 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-lg shadow-lg shadow-pink-500/10 text-slate-900">
+              <PartyPopper size={24} />
+            </div>
+            <span className="text-xl font-bold text-white">Skiboh</span>
+          </Link>
+
+          <div className="flex items-center gap-4">
+            <Link href="/events" className="hidden md:block text-sm font-medium text-slate-300 hover:text-white transition-colors">
+              Browse Events
+            </Link>
+            <UserMenu />
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="flex-1 flex items-center justify-center pt-20 pb-10">
+        {/* Background blobs */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute -top-24 -left-24 w-96 h-96 bg-pink-600/20 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 -right-32 w-96 h-96 bg-yellow-600/10 rounded-full blur-3xl animate-pulse" />
+        </div>
 
       {/* Card */}
       <div className="w-full max-w-md relative z-10 bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-slate-800 shadow-2xl overflow-hidden">
         {/* Gradient header */}
         <div className="h-32 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-600 flex flex-col items-center justify-center relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-          <div className="text-4xl mb-2 animate-bounce">🍯</div>
+          <div className="text-4xl mb-2 animate-bounce"> <PartyPopper size={24} /></div>
           <span className="text-2xl font-bold text-white tracking-tight">Skiboh</span>
         </div>
 
@@ -169,6 +212,12 @@ export default function SignupPage() {
           </div>
         </div>
       </div>
+      </div>
+      {checkingAuth && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="text-white">Loading...</div>
+        </div>
+      )}
     </main>
   );
 }

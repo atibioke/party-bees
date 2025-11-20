@@ -1,7 +1,7 @@
 'use client';
 
 import { Upload, ChevronLeft, ChevronRight } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/Input";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -66,6 +66,29 @@ export default function CreateEventPage() {
     });
 
     const [dragActive, setDragActive] = useState(false);
+
+    // Fetch user profile and prefill form fields
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const res = await fetch('/api/auth/me');
+                const data = await res.json();
+                if (data.success && data.data) {
+                    const user = data.data;
+                    // Prefill form with user data, but only if fields are empty (allows editing)
+                    setFormData(prev => ({
+                        ...prev,
+                        host: prev.host || user.businessName || "",
+                        organizerPhone: prev.organizerPhone || user.whatsapp || "",
+                        organizerEmail: prev.organizerEmail || user.email || "",
+                    }));
+                }
+            } catch (error) {
+                console.error('Failed to fetch profile', error);
+            }
+        };
+        fetchProfile();
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -351,21 +374,35 @@ export default function CreateEventPage() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-800/50">
+                                <div className="pt-4 border-t border-slate-800/50 space-y-4">
+                                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 text-xs text-blue-300/80">
+                                        <span className="font-semibold text-blue-400">💡 Tip:</span> These fields are prefilled from your profile. You can edit them if needed.
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <Input
+                                            label="Organizer Name"
+                                            name="host"
+                                            value={formData.host}
+                                            onChange={handleChange}
+                                            placeholder="e.g. Party Kings"
+                                            className="bg-[#0B0F17] border-slate-800"
+                                        />
+                                        <Input
+                                            label="Phone / WhatsApp"
+                                            name="organizerPhone"
+                                            value={formData.organizerPhone}
+                                            onChange={handleChange}
+                                            placeholder="+234..."
+                                            className="bg-[#0B0F17] border-slate-800"
+                                        />
+                                    </div>
                                     <Input
-                                        label="Organizer Name"
-                                        name="host"
-                                        value={formData.host}
+                                        label="Email"
+                                        name="organizerEmail"
+                                        type="email"
+                                        value={formData.organizerEmail}
                                         onChange={handleChange}
-                                        placeholder="e.g. Party Kings"
-                                        className="bg-[#0B0F17] border-slate-800"
-                                    />
-                                    <Input
-                                        label="Phone / WhatsApp"
-                                        name="organizerPhone"
-                                        value={formData.organizerPhone}
-                                        onChange={handleChange}
-                                        placeholder="+234..."
+                                        placeholder="contact@example.com"
                                         className="bg-[#0B0F17] border-slate-800"
                                     />
                                 </div>

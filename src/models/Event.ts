@@ -24,6 +24,7 @@ export interface IEvent extends Document {
   recurrenceEndType?: 'never' | 'after' | 'on'; // How recurrence ends
   recurrenceEndDate?: Date; // When the recurring series ends (if endType is 'on')
   recurrenceCount?: number; // Number of occurrences (if endType is 'after')
+  featured: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -53,6 +54,7 @@ const EventSchema: Schema = new Schema(
     recurrenceEndType: { type: String, enum: ['never', 'after', 'on'], default: 'never' },
     recurrenceEndDate: { type: Date }, // End date (if endType is 'on')
     recurrenceCount: { type: Number }, // Number of occurrences (if endType is 'after')
+    featured: { type: Boolean, default: false },
   },
   {
     timestamps: true,

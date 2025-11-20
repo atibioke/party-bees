@@ -7,7 +7,7 @@ export async function GET() {
   try {
     await dbConnect();
 
-    // Get featured/trending events - upcoming events sorted by date, limit to 6
+    // Get featured/trending events - prioritize featured events, then upcoming events sorted by date, limit to 6
     const now = new Date();
     const featuredEvents = await Event.find({
       $or: [
@@ -15,9 +15,9 @@ export async function GET() {
         { isRecurring: true } // Include all recurring events
       ]
     })
-      .sort({ startDateTime: 1 }) // Sort by start date (earliest first)
+      .sort({ featured: -1, startDateTime: 1 }) // Sort by featured first (featured events first), then by start date
       .limit(12) // Get more to account for filtering
-      .select('title slug startDateTime endDateTime state lga address host flyer isPaid price labels isRecurring recurringPattern recurrenceInterval recurrenceEndType recurrenceEndDate recurrenceCount')
+      .select('title slug startDateTime endDateTime state lga address host flyer isPaid price labels isRecurring recurringPattern recurrenceInterval recurrenceEndType recurrenceEndDate recurrenceCount featured')
       .lean();
 
     // Process recurring events: update dates to next occurrence if current one has passed

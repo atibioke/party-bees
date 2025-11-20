@@ -14,7 +14,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'Missing email or password' }, { status: 400 });
     }
 
-    const user = await User.findOne({ email });
+    // Trim and lowercase email to handle whitespace and case issues
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return NextResponse.json({ success: false, error: 'Invalid credentials' }, { status: 401 });
     }
