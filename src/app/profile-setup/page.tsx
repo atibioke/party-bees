@@ -15,12 +15,12 @@ export default function ProfileSetupPage() {
       <div className="w-full max-w-md relative z-10 bg-white/90 rounded-3xl shadow-2xl overflow-hidden">
         {/* Gradient header */}
         <div className="h-32 bg-gradient-to-r from-yellow-400 to-pink-500 flex items-center justify-center">
-          <span className="text-3xl font-bold text-white">🐝 Party Bees</span>
+          <span className="text-3xl font-bold text-white">🐝 Skiboh</span>
         </div>
 
         <div className="p-8 space-y-6">
           <h1 className="text-2xl font-bold text-yellow-700">Set Up Your Profile</h1>
-          <p className="text-sm text-slate-600">Tell us more about you to personalize your Party Bees experience.</p>
+          <p className="text-sm text-slate-600">Tell us more about you to personalize your Skiboh experience.</p>
 
           <form className="space-y-4">
             <div>

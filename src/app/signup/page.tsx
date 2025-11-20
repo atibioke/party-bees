@@ -1,100 +1,158 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
-import { FaApple } from 'react-icons/fa';
+import { Input } from '@/components/ui/Input';
 
 export default function SignupPage() {
-  const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
+  const [form, setForm] = useState({
+    businessName: '',
+    businessEmail: '',
+    whatsapp: '',
+    password: '',
+    confirm: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    if (form.password !== form.confirm) {
+      setError("Passwords don't match");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          businessName: form.businessName,
+          email: form.businessEmail,
+          whatsapp: form.whatsapp,
+          password: form.password
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        router.push('/dashboard');
+      } else {
+        setError(data.error || 'Signup failed');
+      }
+    } catch {
+      setError('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <main className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-100 via-pink-50 to-white overflow-hidden">
+    <main className="relative min-h-screen flex items-center justify-center bg-slate-950 text-white overflow-hidden py-10">
       {/* Background blobs */}
-      <div className="absolute -top-24 -left-24 w-72 h-72 bg-pink-300/30 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 -right-32 w-96 h-96 bg-yellow-300/20 rounded-full blur-3xl" />
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-pink-600/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 -right-32 w-96 h-96 bg-yellow-600/10 rounded-full blur-3xl animate-pulse" />
+      </div>
 
       {/* Card */}
-      <div className="w-full max-w-md relative z-10 bg-white/90 rounded-3xl shadow-2xl overflow-hidden">
+      <div className="w-full max-w-md relative z-10 bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-slate-800 shadow-2xl overflow-hidden">
         {/* Gradient header */}
-        <div className="h-32 bg-gradient-to-r from-yellow-400 to-pink-500 flex items-center justify-center">
-          <span className="text-3xl font-bold text-white">🐝 Party Bees</span>
+        <div className="h-32 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-600 flex flex-col items-center justify-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+          <div className="text-4xl mb-2 animate-bounce">🐝</div>
+          <span className="text-2xl font-bold text-white tracking-tight">Skiboh</span>
         </div>
 
         <div className="p-8 space-y-6">
-          <h1 className="text-2xl font-bold text-yellow-700">Create Your Account</h1>
-          <p className="text-sm text-slate-600">Join Party Bees and never miss a vibe.</p>
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-white mb-2">Organizer Account</h1>
+            <p className="text-sm text-slate-400">Create an account to start hosting events.</p>
+          </div>
 
-          <form className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-              <input
-                type="text"
-                value={form.name}
-                onChange={e => setForm({ ...form, name: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-yellow-200/70 focus:border-yellow-400 outline-none transition"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-              <input
-                type="email"
-                value={form.email}
-                onChange={e => setForm({ ...form, email: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-yellow-200/70 focus:border-yellow-400 outline-none transition"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
-              <input
-                type="password"
-                value={form.password}
-                onChange={e => setForm({ ...form, password: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-yellow-200/70 focus:border-yellow-400 outline-none transition"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Confirm Password</label>
-              <input
-                type="password"
-                value={form.confirm}
-                onChange={e => setForm({ ...form, confirm: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-yellow-200/70 focus:border-yellow-400 outline-none transition"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-3 rounded-xl text-white font-semibold bg-gradient-to-r from-yellow-400 to-pink-500 shadow-lg hover:shadow-2xl transform hover:scale-[1.03] transition"
-            >
-              Sign Up
+          {/* Social logins - Moved to top */}
+          <div>
+            <button className="flex items-center justify-center gap-2 w-full py-3 bg-slate-800 border border-slate-700 rounded-xl hover:bg-slate-700 text-slate-200 font-medium transition-colors">
+              <FcGoogle className="text-xl" /> Continue with Google
             </button>
-          </form>
+          </div>
 
           {/* Divider */}
           <div className="flex items-center gap-4">
-            <hr className="flex-1 border-slate-300" />
-            <span className="text-slate-500 text-sm">or</span>
-            <hr className="flex-1 border-slate-300" />
+            <hr className="flex-1 border-slate-700" />
+            <span className="text-slate-500 text-sm font-medium">or register with email</span>
+            <hr className="flex-1 border-slate-700" />
           </div>
 
-          {/* Social logins */}
-          <div className="flex flex-col gap-3">
-            <button className="flex items-center justify-center gap-2 w-full text-slate-700 py-3 border border-slate-300 rounded-xl hover:bg-slate-50 transition">
-              <FcGoogle className="text-xl" /> Continue with Google
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <Input
+              label="Business Name"
+              type="text"
+              placeholder="e.g. Party Kings Events"
+              value={form.businessName}
+              onChange={e => setForm({ ...form, businessName: e.target.value })}
+            />
+
+            <Input
+              label="Business Email"
+              type="email"
+              placeholder="work@business.com"
+              value={form.businessEmail}
+              onChange={e => setForm({ ...form, businessEmail: e.target.value })}
+            />
+
+            <Input
+              label="WhatsApp Number"
+              type="tel"
+              placeholder="+234 800 000 0000"
+              value={form.whatsapp}
+              onChange={e => setForm({ ...form, whatsapp: e.target.value })}
+            />
+
+            <Input
+              label="Password"
+              type="password"
+              placeholder="Create a password"
+              value={form.password}
+              onChange={e => setForm({ ...form, password: e.target.value })}
+            />
+
+            <Input
+              label="Confirm Password"
+              type="password"
+              placeholder="Confirm your password"
+              value={form.confirm}
+              onChange={e => setForm({ ...form, confirm: e.target.value })}
+            />
+
+            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 text-xs text-yellow-200/80 leading-relaxed">
+              <span className="font-bold text-yellow-500 block mb-1">⚠️ Verification Notice</span>
+              For the security of our users, all organizer details will be verified. Please ensure your business information is accurate to avoid account suspension.
+            </div>
+
+            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 rounded-xl text-white font-bold bg-gradient-to-r from-yellow-500 to-pink-600 shadow-lg shadow-pink-500/25 hover:shadow-pink-500/40 transform hover:scale-[1.02] transition-all duration-200 mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Creating Account...' : 'Create Account'}
             </button>
-            <button className="flex items-center justify-center gap-2 w-full text-slate-700 py-3 border border-slate-300 rounded-xl hover:bg-slate-50 transition">
-              <FaApple className="text-xl" /> Continue with Apple
-            </button>
-          </div>
+          </form>
 
           {/* Links */}
-          <div className="flex justify-center text-sm text-slate-600">
+          <div className="text-center text-sm text-slate-400 mt-4">
             Already have an account?{' '}
-            <Link href="/login" className="ml-1 text-yellow-600 font-semibold hover:underline">
+            <Link href="/login" className="text-pink-500 font-bold hover:text-pink-400 hover:underline transition-colors">
               Log in
             </Link>
           </div>

@@ -1,294 +1,407 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
-import AuthActions from '@/components/AuthActions';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import {
+  Search,
+  MapPin,
+  Calendar,
+  Users,
+  Music,
+  ShieldCheck,
+  Zap,
+  Menu,
+  X,
+  ChevronRight
+} from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
-/**
- * Party Bees — Captivating landing page (Tailwind)
- * Put this file at: src/app/page.tsx
- *
- * Notes:
- * - Replace sample images with your own assets or unsplash links.
- * - Tailwind must be installed and configured.
- */
 
-const sampleParties = [
-  {
-    id: '1',
-    title: 'Sunset Rooftop Bash',
-    city: 'Lagos',
-    date: 'Sat, Oct 4 • 9PM',
-    image: `https://picsum.photos/400/250?random=${1}`,
-    attendees: 128,
-  },
-  {
-    id: '2',
-    title: 'Neon House Party',
-    city: 'Accra',
-    date: 'Fri, Oct 10 • 11PM',
-    image: `https://picsum.photos/400/250?random=${2}`,
-    attendees: 92,
-  },
-  {
-    id: '3',
-    title: 'Beach Bonfire & Beats',
-    city: 'Cape Town',
-    date: 'Sun, Oct 12 • 6PM',
-    image: `https://picsum.photos/400/250?random=${3}`,
-    attendees: 210,
-  },
-  {
-    id: '4',
-    title: 'Underground Vinyl Night',
-    city: 'London',
-    date: 'Sat, Oct 18 • 10PM',
-    image: `https://picsum.photos/400/250?random=${4}`,
-    attendees: 64,
-  },
+// Event type for trending events
+interface TrendingEvent {
+  id: string;
+  _id?: string;
+  slug?: string;
+  title: string;
+  startDateTime: string | Date;
+  endDateTime: string | Date;
+  state: string;
+  lga: string;
+  address: string;
+  host: string;
+  flyer?: string;
+  isPaid: boolean;
+  price?: string;
+  labels: string[];
+}
+
+const categories = [
+  { name: 'House Parties', icon: '🏠', count: '450+' },
+  { name: 'Club Nights', icon: '🪩', count: '120+' },
+
+  { name: 'Rooftop', icon: '🌆', count: '60+' },
 ];
 
-export default function HomePage() {
-  const [query, setQuery] = useState('');
-  const [tab, setTab] = useState<'browse' | 'host'>('browse');
-  const scrollRef = useRef<HTMLDivElement | null>(null);
+export default function LandingPage() {
+  const router = useRouter();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [trendingEvents, setTrendingEvents] = useState<TrendingEvent[]>([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
 
-  const scroll = (dir: 'left' | 'right') => {
-    if (!scrollRef.current) return;
-    const distance = 320;
-    scrollRef.current.scrollBy({
-      left: dir === 'left' ? -distance : distance,
-      behavior: 'smooth',
-    });
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Fetch featured/trending events
+  useEffect(() => {
+    const fetchTrendingEvents = async () => {
+      try {
+        setLoadingEvents(true);
+        const res = await fetch('/api/events/featured');
+        const data = await res.json();
+        if (data.success && data.data) {
+          setTrendingEvents(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching trending events:', error);
+      } finally {
+        setLoadingEvents(false);
+      }
+    };
+
+    fetchTrendingEvents();
+  }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      router.push(`/events?search=${encodeURIComponent(searchTerm.trim())}`);
+    } else {
+      router.push('/events');
+    }
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#fffaf0] via-white to-[#fffbeb] text-slate-800">
-      {/* NAV */}
-      <header className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-400 to-pink-500 flex items-center justify-center text-white font-bold shadow">
-            🐝
-          </div>
-          <span className="font-extrabold text-lg">Party Bees</span>
-        </div>
-        
+    <div className="min-h-screen bg-slate-950 text-slate-50 font-sans selection:bg-pink-500 selection:text-white overflow-x-hidden">
 
-        <nav className="flex items-center gap-4">
-          <Link href="/events" className="text-sm font-medium hover:text-yellow-600">Events</Link>
-          <Link href="/about" className="text-sm font-medium hover:text-yellow-600">About</Link>
-          <Link href="/hostevent" className="hidden sm:inline-block px-4 py-2 rounded-lg bg-yellow-500 text-white font-semibold shadow hover:bg-yellow-600 transition">
-            Host a Party
-          </Link>
-            <Link href="/user-profile" className="text-sm font-medium hover:text-yellow-600">Profile</Link>
-               <Link href="/admin" className="text-sm font-medium hover:text-yellow-600">Admin</Link>
-          <Link href="/login" className="text-sm" >Log in</Link>
-        </nav>
-      </header>
-
-      {/* HERO */}
-      <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center py-12">
-        <div className="space-y-6">
-          <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight">
-            Find the best parties. Meet the right people. Make memories.
-          </h1>
-          <p className="text-lg text-slate-600 max-w-xl">
-            Party Bees helps you discover curated local events, RSVP safely, and connect with hosts and guests — all in one place.
-          </p>
-
-          {/* Search & quick action */}
-          <div className="flex gap-3 items-center">
-            <div className="flex bg-white rounded-full shadow-sm p-1 items-center overflow-hidden">
-              <input
-                aria-label="Search parties"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search parties, city or tag (e.g., rooftop, beach)"
-                className="px-4 py-3 w-64 sm:w-96 outline-none text-sm"
-              />
-              <button className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-full ml-1 font-semibold transition" onClick={() => { /* implement search */ }}>
-                Search
-              </button>
+      {/* Navigation */}
+      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 border-b border-transparent ${isScrolled ? 'bg-slate-950/80 backdrop-blur-md border-slate-800 py-3' : 'bg-transparent py-5'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-pink-500 rounded-xl flex items-center justify-center text-2xl shadow-lg shadow-pink-500/20">
+              🐝
             </div>
-
-            {/* <div className="flex items-center gap-2">
-              <button
-                onClick={() => setTab('browse')}
-                className={`px-3 py-2 rounded-full text-sm ${tab==='browse' ? 'bg-yellow-100 text-yellow-700' : 'bg-transparent hover:bg-yellow-50'}`}
-              >
-                Browse
-              </button>
-              <button
-                onClick={() => setTab('host')}
-                className={`px-3 py-2 rounded-full text-sm ${tab==='host' ? 'bg-yellow-100 text-yellow-700' : 'bg-transparent hover:bg-yellow-50'}`}
-              >
-                Host
-              </button>
-            </div> */}
+            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+              Skiboh
+            </span>
           </div>
-               
 
-
-          {/* Trust & quick stats */}
-          <div className="flex gap-6 mt-2">
-            <div className="flex items-center gap-3">
-              <div className="rounded-full bg-white p-2 shadow text-sm font-semibold">🌍</div>
-              <div className="text-sm">
-                <div className="font-medium">300k+</div>
-                <div className="text-xs text-slate-500">Events posted</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="rounded-full bg-white p-2 shadow text-sm font-semibold">🔒</div>
-              <div className="text-sm">
-                <div className="font-medium">Verified hosts</div>
-                <div className="text-xs text-slate-500">Safety-first community</div>
-              </div>
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center gap-8">
+            <Link href="/events" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">Find Events</Link>
+            <Link href="/about" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">About</Link>
+            <div className="flex items-center gap-4">
+              <Link href="/login" className="text-sm font-medium text-white hover:text-pink-400 transition-colors">Login</Link>
+              <Link href="/signup">
+                <Button variant="primary" className="py-2 px-6 text-sm">Sign Up</Button>
+              </Link>
             </div>
           </div>
+
+          {/* Mobile Menu Toggle */}
+          <button
+            className="md:hidden p-2 text-slate-300 hover:text-white"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
 
-        {/* Hero visual + CTA */}
-        <div className="relative rounded-2xl overflow-hidden shadow-lg">
-          <div className="aspect-[16/10] sm:aspect-[4/3] bg-gradient-to-br from-pink-50 to-yellow-50">
-            <img src={`https://picsum.photos/400/250?random=${6}`} alt="party" className="w-full h-full object-cover opacity-90" />
+        {/* Mobile Nav Dropdown */}
+        {mobileMenuOpen && (
+          <div className="md:hidden absolute top-full left-0 w-full bg-slate-900 border-b border-slate-800 p-4 flex flex-col gap-4 shadow-2xl">
+            <Link href="/events" className="text-slate-300 hover:text-white py-2 block">Find Events</Link>
+            <Link href="/dashboard/event/new" className="text-slate-300 hover:text-white py-2 block">Host a Party</Link>
+            <Link href="/about" className="text-slate-300 hover:text-white py-2 block">About Us</Link>
+            <div className="h-px bg-slate-800 my-2"></div>
+            <Link href="/login" className="text-slate-300 hover:text-white py-2 block">Login</Link>
+            <Link href="/signup" className="w-full block">
+              <Button variant="primary" className="w-full justify-center">Sign Up</Button>
+            </Link>
+          </div>
+        )}
+      </nav>
+
+
+      {/* Hero Section */}
+      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+        {/* Background effects */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-pink-600/20 rounded-full blur-3xl mix-blend-screen animate-pulse"></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-yellow-600/10 rounded-full blur-3xl mix-blend-screen"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center max-w-4xl mx-auto space-y-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-pink-400 text-xs font-bold uppercase tracking-wider shadow-sm animate-fade-in-up">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
+              </span>
+              The #1 Party Platform
+            </div>
+
+            <h1 className="text-5xl sm:text-6xl lg:text-8xl font-extrabold tracking-tight text-white leading-[1.1]">
+              Party Hard <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-600">
+                Create Memories!
+              </span>
+            </h1>
+
+            {/* Large Search Bar */}
+            <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto">
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-pink-500/20 to-orange-500/20 rounded-2xl blur-xl"></div>
+              <div className="relative bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-2xl p-2 flex items-center gap-2 shadow-2xl">
+                <Search className="w-6 h-6 text-slate-400 ml-4 flex-shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Search events, locations, vibes..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="flex-1 bg-transparent text-white placeholder-slate-500 text-lg py-3 focus:outline-none"
+                />
+                <Button type="submit" variant="primary" className="px-8 py-3 text-lg font-bold">
+                  Search
+                </Button>
+              </div>
+            </form>
+
+            <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+              Discover the hottest parties, concerts, and events happening across Nigeria. 
+              From rooftop vibes to beach bashes, find your perfect night out in any city.
+            </p>
+
+            <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-slate-400">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-green-400" />
+                <span>Verified Events</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-yellow-400" />
+                <span>Instant RSVP</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-pink-400" />
+                <span>Join the Community</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Trending Events Section */}
+      <section className="py-20 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h2 className="text-4xl font-bold text-white mb-2">Trending Now</h2>
+              <p className="text-slate-400">The hottest events happening this week across Nigeria</p>
+            </div>
+            <Link href="/events">
+              <Button variant="secondary" className="hidden md:flex items-center gap-2">
+                View All
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </Link>
           </div>
 
-          <div className="absolute left-6 bottom-6 right-6 flex items-center justify-between gap-4">
-            <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow">
-              <div className="text-sm text-slate-600">Next big party</div>
-              <div className="font-bold">Sunset Rooftop Bash</div>
-              <div className="text-xs text-slate-500">Lagos • Sat, Oct 4</div>
+          {loadingEvents ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl overflow-hidden animate-pulse">
+                  <div className="h-48 bg-slate-800"></div>
+                  <div className="p-6 space-y-3">
+                    <div className="h-4 bg-slate-800 rounded w-1/3"></div>
+                    <div className="h-6 bg-slate-800 rounded"></div>
+                    <div className="h-4 bg-slate-800 rounded w-2/3"></div>
+                  </div>
+                </div>
+              ))}
             </div>
-            <Link href="/events/create" className="px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-semibold shadow">
-              Create event
+          ) : trendingEvents.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {trendingEvents.map((event) => {
+                const startDate = new Date(event.startDateTime);
+                const formattedDate = startDate.toLocaleDateString('en-NG', {
+                  month: 'short',
+                  day: 'numeric',
+                });
+                const formattedTime = startDate.toLocaleTimeString('en-NG', {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true,
+                });
+                const category = event.labels && event.labels.length > 0 ? event.labels[0] : 'Event';
+                const location = `${event.lga}, ${event.state}`;
+                const priceDisplay = event.isPaid ? (event.price || 'Paid') : 'Free';
+                const eventSlug = event.slug || event.id;
+
+                return (
+                  <Link
+                    key={event.id}
+                    href={`/events/${eventSlug}`}
+                    className="group relative bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl overflow-hidden hover:border-pink-500/50 transition-all duration-300 hover:scale-[1.02]"
+                  >
+                    <div className="relative h-48 overflow-hidden">
+                      {event.flyer ? (
+                        <Image
+                          src={event.flyer}
+                          alt={event.title}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-pink-500/20 to-yellow-500/20 flex items-center justify-center">
+                          <Music className="w-16 h-16 text-slate-400" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent"></div>
+                      <div className="absolute top-4 right-4 px-3 py-1 bg-slate-900/80 backdrop-blur-sm rounded-full text-xs font-bold text-white">
+                        {priceDisplay}
+                      </div>
+                    </div>
+                    <div className="p-6 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-pink-400 uppercase tracking-wider">
+                          {category}
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-bold text-white group-hover:text-pink-400 transition-colors line-clamp-2">
+                        {event.title}
+                      </h3>
+                      <div className="flex items-center gap-4 text-sm text-slate-400">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          <span>{formattedDate}, {formattedTime}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <MapPin className="w-4 h-4" />
+                          <span className="truncate">{location}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-slate-400">No upcoming events at the moment. Check back soon!</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Categories Section */}
+      <section className="py-20 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-white mb-2">Explore by Category</h2>
+            <p className="text-slate-400">Find events that match your vibe</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {categories.map((category) => (
+              <Link
+                key={category.name}
+                href={`/events?category=${category.name.toLowerCase().replace(/\s+/g, '-')}`}
+                className="group bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 hover:border-pink-500/50 transition-all duration-300 hover:scale-105 text-center"
+              >
+                <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">
+                  {category.icon}
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-2">{category.name}</h3>
+                <p className="text-slate-400 text-sm">{category.count} Events</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 relative">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="bg-gradient-to-r from-yellow-500/10 via-pink-500/10 to-orange-500/10 rounded-3xl p-12 border border-slate-800">
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Ready to Host Your Own Event?
+            </h2>
+            <p className="text-slate-400 text-lg mb-8">
+              Join thousands of event organizers across Nigeria and create unforgettable experiences.
+            </p>
+            <Link href="/dashboard/event/new">
+              <Button variant="primary" size="lg" className="text-lg px-8 py-4">
+                Create Your Event
+              </Button>
             </Link>
           </div>
         </div>
       </section>
-   
 
-      {/* Horizontal carousel (Trending) */}
-      <section className="max-w-7xl mx-auto px-6 py-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold">🔥 Trending near you</h2>
-          <div className="flex gap-2">
-            <button onClick={() => scroll('left')} aria-label="Scroll left" className="p-2 rounded-lg bg-white shadow hover:bg-slate-50">◀</button>
-            <button onClick={() => scroll('right')} aria-label="Scroll right" className="p-2 rounded-lg bg-white shadow hover:bg-slate-50">▶</button>
-          </div>
-        </div>
-
-        <div
-          ref={scrollRef}
-          className="flex gap-5 overflow-x-auto no-scrollbar snap-x snap-mandatory px-1 pb-1"
-        >
-          {sampleParties.map((p) => (
-            <article key={p.id} className="snap-start min-w-[280px] max-w-[320px] bg-white rounded-2xl shadow hover:shadow-2xl transition transform hover:-translate-y-1">
-              <div className="h-[180px] rounded-t-2xl overflow-hidden">
-                <img src={p.image} alt={p.title} className="w-full h-full object-cover" />
-              </div>
-              <div className="p-4">
-                <h3 className="font-bold text-lg">{p.title}</h3>
-                <p className="text-sm text-slate-500">{p.city} • {p.date}</p>
-                <div className="mt-3 flex items-center justify-between">
-                  <div className="text-xs text-slate-600">{p.attendees} going</div>
-                  <div className="flex gap-2">
-                    <Link href={`/events/${p.id}`} className="text-yellow-600 text-sm font-semibold hover:underline">View</Link>
-                    <button className="px-3 py-1 rounded-lg bg-yellow-500 text-white text-sm font-medium shadow">RSVP</button>
-                  </div>
+      {/* Footer */}
+      <footer className="border-t border-slate-800 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-pink-500 rounded-lg flex items-center justify-center text-xl">
+                  🐝
                 </div>
+                <span className="text-xl font-bold text-white">Skiboh</span>
               </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      {/* Features / Benefits */}
-      <section className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="p-6 rounded-2xl bg-white shadow text-center">
-            <div className="text-4xl">🔎</div>
-            <h4 className="font-bold mt-4">Curated events</h4>
-            <p className="text-sm text-slate-500 mt-2">We surface high-quality events based on your vibe and city.</p>
-          </div>
-          <div className="p-6 rounded-2xl bg-white shadow text-center">
-            <div className="text-4xl">🛡️</div>
-            <h4 className="font-bold mt-4">Safety-first</h4>
-            <p className="text-sm text-slate-500 mt-2">Verified hosts, community reports, and in-app emergency support.</p>
-          </div>
-          <div className="p-6 rounded-2xl bg-white shadow text-center">
-            <div className="text-4xl">🤝</div>
-            <h4 className="font-bold mt-4">Connect & chat</h4>
-            <p className="text-sm text-slate-500 mt-2">Message hosts or other attendees to coordinate plans privately.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Safety & Moderation highlight */}
-      <section className="max-w-7xl mx-auto px-6 py-8 bg-yellow-50 rounded-2xl my-6">
-        <div className="md:flex md:items-center md:justify-between gap-6">
-          <div>
-            <h3 className="text-2xl font-bold">Your safety matters</h3>
-            <p className="text-slate-600 mt-2 max-w-xl">
-              We combine host verification, community ratings, and manual moderation. Hosts can be verified with ID and social checks, and every event has a safety contact and a quick-report button.
-            </p>
-            <div className="mt-4 flex gap-3">
-              <div className="bg-white rounded-full px-3 py-2 shadow text-sm">Host verification</div>
-              <div className="bg-white rounded-full px-3 py-2 shadow text-sm">Community reports</div>
-              <div className="bg-white rounded-full px-3 py-2 shadow text-sm">Emergency support</div>
+              <p className="text-slate-400 text-sm">
+                The #1 party platform for Nigeria. Find and create unforgettable events across all Nigerian cities.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-white font-bold mb-4">Discover</h4>
+              <ul className="space-y-2 text-slate-400 text-sm">
+                <li><Link href="/events" className="hover:text-white transition-colors">All Events</Link></li>
+                <li><Link href="/events?category=nightlife" className="hover:text-white transition-colors">Nightlife</Link></li>
+                <li><Link href="/events?category=music" className="hover:text-white transition-colors">Music</Link></li>
+                <li><Link href="/events?category=beach" className="hover:text-white transition-colors">Beach Parties</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-white font-bold mb-4">Organize</h4>
+              <ul className="space-y-2 text-slate-400 text-sm">
+                <li><Link href="/dashboard/event/new" className="hover:text-white transition-colors">Create Event</Link></li>
+                <li><Link href="/dashboard" className="hover:text-white transition-colors">My Events</Link></li>
+                <li><Link href="/about" className="hover:text-white transition-colors">How It Works</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-white font-bold mb-4">Connect</h4>
+              <ul className="space-y-2 text-slate-400 text-sm">
+                <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
+                <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
+                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+              </ul>
             </div>
           </div>
-
-          <div className="mt-6 md:mt-0">
-            <img src="https://images.unsplash.com/photo-1518600506278-4e8ef466b810?w=800&q=80&auto=format&fit=crop" alt="safety" className="w-[260px] rounded-xl shadow" />
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="max-w-7xl mx-auto px-6 py-12">
-        <h3 className="text-2xl font-bold text-center mb-8">What our users say</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <blockquote className="p-6 bg-white rounded-2xl shadow">
-            <p className="text-slate-700">“I found my favorite crew through Party Bees. Events are always well-moderated and fun.”</p>
-            <footer className="mt-4 text-sm text-slate-500">— Aisha, Lagos</footer>
-          </blockquote>
-          <blockquote className="p-6 bg-white rounded-2xl shadow">
-            <p className="text-slate-700">“Easy to host and manage RSVPs — I posted a flyer and had 120 confirmed within 2 days.”</p>
-            <footer className="mt-4 text-sm text-slate-500">— Miguel, Cape Town</footer>
-          </blockquote>
-          <blockquote className="p-6 bg-white rounded-2xl shadow">
-            <p className="text-slate-700">“The chat feature made planning simple. The safety features give me confidence to attend.”</p>
-            <footer className="mt-4 text-sm text-slate-500">— Rosa, Madrid</footer>
-          </blockquote>
-        </div>
-      </section>
-
-      {/* CTA strip */}
-      <section className="py-8">
-        <div className="max-w-7xl mx-auto px-6 bg-gradient-to-r from-yellow-500 to-pink-400 rounded-2xl text-white p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div>
-            <h4 className="font-bold text-xl">Ready to join the buzz?</h4>
-            <p className="text-sm opacity-90">Sign up for free and discover parties near you — or host your own.</p>
-          </div>
-          <div className="flex gap-3">
-            <Link href="/signup" className="px-5 py-2 bg-white text-yellow-600 rounded-full font-semibold shadow">Get Started</Link>
-            <Link href="/events" className="px-5 py-2 border border-white/60 rounded-full">Browse events</Link>
-          </div>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="py-8 text-sm text-slate-500">
-        <div className="max-w-7xl mx-auto px-6 md:flex md:items-center md:justify-between">
-          <div>© {new Date().getFullYear()} Party Bees</div>
-          <div className="flex gap-6 mt-4 md:mt-0">
-            <Link href="/terms" className="hover:underline">Terms</Link>
-            <Link href="/privacy" className="hover:underline">Privacy</Link>
-            <Link href="/help" className="hover:underline">Help</Link>
+          <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400 text-sm">
+            <p>&copy; {new Date().getFullYear()} Skiboh. All rights reserved. Lagos, Nigeria.</p>
           </div>
         </div>
       </footer>
-    </main>
+    </div>
   );
 }
