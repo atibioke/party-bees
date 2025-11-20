@@ -12,7 +12,12 @@ export interface IEvent extends Document {
   hostId: mongoose.Schema.Types.ObjectId; // Reference to User
   organizerPhone: string;
   organizerEmail: string;
-  flyer: string;
+  flyer: string; // Legacy - kept for backward compatibility
+  media: {
+    url: string;
+    type: 'image' | 'video';
+    order: number;
+  }[];
   description: string;
   isPaid: boolean;
   price?: string;
@@ -42,7 +47,25 @@ const EventSchema: Schema = new Schema(
     hostId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     organizerPhone: { type: String, required: true },
     organizerEmail: { type: String, required: true },
-    flyer: { type: String },
+    flyer: { type: String }, // Legacy - kept for backward compatibility
+    media: {
+      type: [
+        {
+          url: { type: String, required: true },
+          type: { type: String, enum: ['image', 'video'], required: true },
+          order: { type: Number, required: true },
+        },
+      ],
+      default: [],
+      validate: {
+        validator: function (v: any[]) {
+          const images = v.filter((m) => m.type === 'image');
+          const videos = v.filter((m) => m.type === 'video');
+          return images.length <= 5 && videos.length <= 1;
+        },
+        message: 'Maximum 5 images and 1 video allowed',
+      },
+    },
     description: { type: String, required: true },
     isPaid: { type: Boolean, default: false },
     price: { type: String },

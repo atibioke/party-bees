@@ -31,7 +31,9 @@ export async function POST(req: Request) {
     const token = await signJWT({ 
       userId: user._id.toString(), 
       email: user.email, 
-      role: user.role 
+      role: user.role,
+      profileCompleted: user.profileCompleted,
+      acceptedTerms: user.acceptedTerms
     });
 
     const cookieStore = await cookies();

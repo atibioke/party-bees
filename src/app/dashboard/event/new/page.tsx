@@ -8,6 +8,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import statesData from "@/utils/states.json";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
+import MediaUploader from "@/components/MediaUploader";
 
 interface EventFormData {
     title: string;
@@ -19,7 +20,12 @@ interface EventFormData {
     host: string;
     organizerPhone: string;
     organizerEmail: string;
-    flyer: string;
+    flyer: string; // Legacy - kept for backward compatibility
+    media: {
+        url: string;
+        type: 'image' | 'video';
+        order: number;
+    }[];
     description: string;
     isPaid: boolean;
     price: string;
@@ -27,10 +33,10 @@ interface EventFormData {
     labels: string[];
     isRecurring: boolean;
     recurringPattern: string;
-    recurrenceInterval: number; // e.g., every 2 weeks
-    recurrenceEndType: 'never' | 'after' | 'on'; // How the recurrence ends
+    recurrenceInterval: number;
+    recurrenceEndType: 'never' | 'after' | 'on';
     recurrenceEndDate: Date | null;
-    recurrenceCount: number; // Number of occurrences (if endType is 'after')
+    recurrenceCount: number;
 }
 
 const VIBE_LABELS = [
@@ -52,6 +58,7 @@ export default function CreateEventPage() {
         organizerPhone: "",
         organizerEmail: "",
         flyer: "",
+        media: [],
         description: "",
         isPaid: false,
         price: "",
@@ -71,7 +78,7 @@ export default function CreateEventPage() {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const res = await fetch('/api/auth/me');
+                const res = await fetch('/api/auth/me', { cache: 'no-store' });
                 const data = await res.json();
                 if (data.success && data.data) {
                     const user = data.data;
@@ -420,34 +427,17 @@ export default function CreateEventPage() {
                             </div>
 
                             <div className="space-y-5">
-                                {/* Flyer Upload */}
+                                {/* Media Upload */}
                                 <div>
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Event Flyer</label>
-                                    <div
-                                        className={`border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer ${dragActive
-                                            ? 'border-white bg-white/5'
-                                            : 'border-slate-800 bg-[#0B0F17] hover:border-slate-600'
-                                            }`}
-                                        onDragEnter={handleDrag}
-                                        onDragLeave={handleDrag}
-                                        onDragOver={handleDrag}
-                                        onDrop={handleDrop}
-                                    >
-                                        <div className="flex flex-col items-center gap-2">
-                                            <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center">
-                                                <Upload className="w-5 h-5 text-slate-400" />
-                                            </div>
-                                            <p className="text-sm font-medium text-white">Click to upload or drag and drop</p>
-                                            <p className="text-xs text-slate-500">PNG, JPG (max. 5MB)</p>
-                                        </div>
-                                    </div>
-                                    <input
-                                        name="flyer"
-                                        placeholder="Or paste image URL..."
-                                        value={formData.flyer}
-                                        onChange={handleChange}
-                                        className="w-full bg-[#0B0F17] border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm mt-3 focus:outline-none focus:border-white/30"
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Event Media</label>
+                                    <MediaUploader
+                                        value={formData.media}
+                                        onChange={(media) => setFormData(prev => ({ ...prev, media }))}
+                                        maxImages={5}
+                                        maxVideos={1}
+                                        maxSizeMB={20}
                                     />
+                                    <p className="text-xs text-slate-500 mt-2">Upload up to 5 images and 1 video (max 20MB each)</p>
                                 </div>
 
                                 {/* Ticket Type */}

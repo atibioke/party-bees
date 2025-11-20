@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { User, LogOut, Calendar, Plus, Menu, X } from 'lucide-react';
-import Image from 'next/image';
+import { LogOut, Calendar, Plus, Menu, X } from 'lucide-react';
+
 import { Button } from './ui/Button';
 
 interface UserProfile {
@@ -25,7 +25,7 @@ export function UserMenu() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch('/api/auth/me');
+        const res = await fetch('/api/auth/me', { cache: 'no-store' });
         const data = await res.json();
         if (data.success && data.data) {
           setProfile(data.data);
@@ -66,7 +66,7 @@ export function UserMenu() {
       setIsAuthenticated(false);
       setProfile(null);
       setIsOpen(false);
-      router.push('/login');
+      router.push('/');
     } catch (error) {
       console.error('Logout failed', error);
     }
@@ -122,11 +122,11 @@ export function UserMenu() {
 
   const userInitials = profile?.businessName
     ? profile.businessName
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2)
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2)
     : profile?.email?.[0].toUpperCase() || 'U';
 
   return (

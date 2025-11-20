@@ -1,0 +1,21 @@
+[2025-11-20T14:33:19.996Z] Google User Info: {"email":"dealwap1337@gmail.com","name":"Nas Nas"}
+[2025-11-20T14:33:20.361Z] Found existing user: {"id":"691e849f59ec8077a405d486","email":"info@naijavibes.com","businessName":"Naija Vibes Events"}
+[2025-11-20T14:33:25.530Z] Me API - Token Payload: {"userId":"691e849f59ec8077a405d486","email":"info@naijavibes.com"}
+[2025-11-20T14:33:25.535Z] Me API - Token Payload: {"userId":"691e849f59ec8077a405d486","email":"info@naijavibes.com"}
+[2025-11-20T14:33:27.583Z] Me API - Token Payload: {"userId":"691e849f59ec8077a405d486","email":"info@naijavibes.com"}
+[2025-11-20T14:33:27.616Z] Me API - Token Payload: {"userId":"691e849f59ec8077a405d486","email":"info@naijavibes.com"}
+[2025-11-20T14:33:27.618Z] Me API - Token Payload: {"userId":"691e849f59ec8077a405d486","email":"info@naijavibes.com"}
+[2025-11-20T14:33:27.622Z] Me API - Token Payload: {"userId":"691e849f59ec8077a405d486","email":"info@naijavibes.com"}
+[2025-11-20T14:37:07.073Z] Google User Info: {"email":"codersteam45@gmail.com","name":"Coder Steam"}
+[2025-11-20T14:37:07.328Z] Conflict detected: Google ID matches user but email does not. Unlinking old user. {"dbEmail":"info@naijavibes.com","googleEmail":"codersteam45@gmail.com","userId":"691e849f59ec8077a405d486"}
+[2025-11-20T14:37:07.846Z] Creating new user for: "codersteam45@gmail.com"
+[2025-11-20T14:37:14.560Z] Me API - Token Payload: {"userId":"691f2793d361bd3002a99454","email":"codersteam45@gmail.com"}
+[2025-11-20T14:37:14.580Z] Me API - Token Payload: {"userId":"691f2793d361bd3002a99454","email":"codersteam45@gmail.com"}
+[2025-11-20T14:37:24.558Z] Me API - Token Payload: {"userId":"691f2793d361bd3002a99454","email":"codersteam45@gmail.com"}
+[2025-11-20T14:37:24.562Z] Me API - Token Payload: {"userId":"691f2793d361bd3002a99454","email":"codersteam45@gmail.com"}
+[2025-11-20T14:37:51.896Z] Me API - Token Payload: {"userId":"691f2793d361bd3002a99454","email":"codersteam45@gmail.com"}
+[2025-11-20T14:37:51.908Z] Me API - Token Payload: {"userId":"691f2793d361bd3002a99454","email":"codersteam45@gmail.com"}
+[2025-11-20T14:37:51.910Z] Me API - Token Payload: {"userId":"691f2793d361bd3002a99454","email":"codersteam45@gmail.com"}
+[2025-11-20T14:37:51.912Z] Me API - Token Payload: {"userId":"691f2793d361bd3002a99454","email":"codersteam45@gmail.com"}
+[2025-11-20T14:38:01.569Z] Me API - Token Payload: {"userId":"691f2793d361bd3002a99454","email":"codersteam45@gmail.com"}
+[2025-11-20T14:38:01.575Z] Me API - Token Payload: {"userId":"691f2793d361bd3002a99454","email":"codersteam45@gmail.com"}

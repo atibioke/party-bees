@@ -3,6 +3,9 @@ import { cookies } from 'next/headers';
 import { verifyJWT } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
+import { logDebug } from '@/lib/logger';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
@@ -35,14 +38,22 @@ export async function GET() {
       ? payload.userId 
       : String(payload.userId);
     
+    logDebug('Me API - Token Payload:', { userId, email: payload.email });
+
     const user = await User.findById(userId).select('-password'); // Exclude password
 
     if (!user) {
+      logDebug('Me API - User not found in DB for ID:', userId);
       console.error('User not found for userId:', userId, 'Payload:', payload);
       return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, data: user });
+    const response = NextResponse.json({ success: true, data: user });
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+    
+    return response;
   } catch (error) {
     console.error('Me error:', error);
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });

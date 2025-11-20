@@ -40,15 +40,15 @@ export default function DashboardLayout({
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const res = await fetch('/api/auth/me');
+                const res = await fetch('/api/auth/me', { cache: 'no-store' });
                 const data = await res.json();
-                
+
                 // Only redirect on authentication errors (401, 403)
                 if (res.status === 401 || res.status === 403) {
                     router.push('/login');
                     return;
                 }
-                
+
                 if (data.success && data.data) {
                     setProfile(data.data);
                 } else if (res.status >= 400) {
@@ -69,7 +69,7 @@ export default function DashboardLayout({
     const handleLogout = async () => {
         try {
             await fetch('/api/auth/logout', { method: 'POST' });
-            router.push('/login');
+            router.push('/');
         } catch (error) {
             console.error("Logout failed", error);
         }
@@ -82,7 +82,7 @@ export default function DashboardLayout({
             <div className="md:hidden fixed top-0 w-full z-30 bg-[#0F131D] border-b border-slate-800/60 px-4 py-3 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-lg shadow-lg shadow-pink-500/10 text-slate-900">
-                        
+
                     </div>
                     <span className="text-lg font-bold text-white tracking-tight">Skiboh</span>
                 </Link>
@@ -103,7 +103,7 @@ export default function DashboardLayout({
                 <div className="p-6 h-full flex flex-col">
                     <Link href="/" className="hidden md:flex items-center gap-3 mb-10">
                         <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center text-xl shadow-lg shadow-pink-500/10 text-slate-900">
-                            
+
                         </div>
                         <span className="text-lg font-bold text-white tracking-tight">Skiboh</span>
                     </Link>

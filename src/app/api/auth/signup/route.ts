@@ -8,10 +8,14 @@ import { cookies } from 'next/headers';
 export async function POST(req: Request) {
   try {
     await dbConnect();
-    const { businessName, email, whatsapp, password } = await req.json();
+    const { businessName, email, whatsapp, password, acceptedTerms } = await req.json();
 
     if (!businessName || !email || !whatsapp || !password) {
       return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
+    }
+
+    if (!acceptedTerms) {
+      return NextResponse.json({ success: false, error: 'You must accept the terms and conditions' }, { status: 400 });
     }
 
     const existingUser = await User.findOne({ email });
@@ -26,6 +30,9 @@ export async function POST(req: Request) {
       email,
       whatsapp,
       password: hashedPassword,
+      provider: 'local',
+      acceptedTerms: true,
+      termsAcceptedAt: new Date(),
     });
 
     // Create session immediately after signup
@@ -33,7 +40,9 @@ export async function POST(req: Request) {
     const token = await signJWT({ 
       userId: user._id.toString(), 
       email: user.email, 
-      role: user.role 
+      role: user.role,
+      profileCompleted: true, // Local signups have completed profile
+      acceptedTerms: true
     });
     
     const cookieStore = await cookies();

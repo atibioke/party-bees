@@ -72,7 +72,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const checkAdmin = async () => {
       try {
-        const res = await fetch('/api/auth/me');
+        const res = await fetch('/api/auth/me', { cache: 'no-store' });
         const data = await res.json();
         if (data.success && data.data) {
           if (data.data.role !== 'admin') {
@@ -301,7 +301,7 @@ export default function AdminDashboard() {
   const handleLogout = async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
-      router.push('/login');
+      router.push('/');
     } catch (error) {
       console.error('Logout failed', error);
     }
@@ -349,8 +349,8 @@ export default function AdminDashboard() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${activeTab === tab.id
-                  ? "bg-gradient-to-r from-pink-500/20 to-purple-500/10 border border-pink-500/20 text-white font-medium shadow-sm"
-                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                ? "bg-gradient-to-r from-pink-500/20 to-purple-500/10 border border-pink-500/20 text-white font-medium shadow-sm"
+                : "text-slate-400 hover:bg-slate-800 hover:text-white"
                 }`}
             >
               <span className={activeTab === tab.id ? "text-pink-400" : "text-slate-500"}>{tab.icon}</span>
@@ -432,7 +432,7 @@ export default function AdminDashboard() {
                   </div>
                   <p className="text-sm text-slate-500 font-medium uppercase tracking-wider">Banned Users</p>
                   <p className="text-3xl font-black text-white mt-1">{stats.bannedUsers}</p>
-              </div>
+                </div>
 
                 <div className="bg-slate-900/50 backdrop-blur-md p-6 rounded-2xl border border-slate-800 shadow-xl">
                   <div className="flex justify-between items-start mb-4">
@@ -508,11 +508,10 @@ export default function AdminDashboard() {
                             <td className="px-6 py-4">
                               <button
                                 onClick={() => handleBanUser(user._id, user.banned, user.businessName)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                                  user.banned
-                                    ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
-                                    : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
-                                }`}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${user.banned
+                                  ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
+                                  : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                                  }`}
                               >
                                 {user.banned ? 'Unban' : 'Ban'}
                               </button>
@@ -566,9 +565,8 @@ export default function AdminDashboard() {
                         setEventsFilter('all');
                         fetchEvents(1, searchTerm);
                       }}
-                      className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
-                        eventsFilter === 'all' ? 'bg-white text-slate-900' : 'text-slate-400 hover:text-white'
-                      }`}
+                      className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${eventsFilter === 'all' ? 'bg-white text-slate-900' : 'text-slate-400 hover:text-white'
+                        }`}
                     >
                       All
                     </button>
@@ -577,9 +575,8 @@ export default function AdminDashboard() {
                         setEventsFilter('featured');
                         fetchEvents(1, searchTerm, 'featured');
                       }}
-                      className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
-                        eventsFilter === 'featured' ? 'bg-white text-slate-900' : 'text-slate-400 hover:text-white'
-                      }`}
+                      className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${eventsFilter === 'featured' ? 'bg-white text-slate-900' : 'text-slate-400 hover:text-white'
+                        }`}
                     >
                       Featured
                     </button>
@@ -588,9 +585,8 @@ export default function AdminDashboard() {
                         setEventsFilter('not-featured');
                         fetchEvents(1, searchTerm, 'not-featured');
                       }}
-                      className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
-                        eventsFilter === 'not-featured' ? 'bg-white text-slate-900' : 'text-slate-400 hover:text-white'
-                      }`}
+                      className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${eventsFilter === 'not-featured' ? 'bg-white text-slate-900' : 'text-slate-400 hover:text-white'
+                        }`}
                     >
                       Not Featured
                     </button>
@@ -648,11 +644,10 @@ export default function AdminDashboard() {
                         <div className="flex gap-2 flex-wrap">
                           <button
                             onClick={() => handleFeatureEvent(event._id, event.featured)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                              event.featured
-                                ? 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30'
-                                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                            }`}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${event.featured
+                              ? 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30'
+                              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                              }`}
                           >
                             {event.featured ? 'Unfeature' : 'Feature'}
                           </button>
@@ -673,8 +668,8 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   ))}
-            </div>
-          )}
+                </div>
+              )}
 
               {/* Pagination */}
               {Math.ceil(eventsTotal / 20) > 1 && (
@@ -696,7 +691,7 @@ export default function AdminDashboard() {
                   >
                     Next
                   </button>
-              </div>
+                </div>
               )}
             </div>
           )}
