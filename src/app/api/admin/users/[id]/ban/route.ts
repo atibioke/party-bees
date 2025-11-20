@@ -34,7 +34,7 @@ async function checkAdmin() {
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const adminCheck = await checkAdmin();
@@ -47,7 +47,7 @@ export async function PUT(
 
     await dbConnect();
     const { banned } = await req.json();
-    const userId = params.id;
+    const { id: userId } = await params;
 
     // Prevent admin from banning themselves
     if (userId === adminCheck.userId) {

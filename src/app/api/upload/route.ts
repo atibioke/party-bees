@@ -39,18 +39,19 @@ export async function POST(req: NextRequest) {
 
     // Convert file to buffer
     const arrayBuffer = await file.arrayBuffer();
-    let buffer = Buffer.from(arrayBuffer);
+    let buffer = Buffer.from(arrayBuffer) as Buffer;
 
     // For images, optimize using sharp
     if (isImage) {
       try {
-        buffer = await sharp(buffer)
+        const optimizedBuffer = await sharp(buffer)
           .resize(1920, 1080, {
             fit: 'inside',
             withoutEnlargement: true,
           })
           .jpeg({ quality: 85 })
           .toBuffer();
+        buffer = optimizedBuffer;
       } catch (error) {
         console.error('Image optimization error:', error);
         // If optimization fails, use original buffer

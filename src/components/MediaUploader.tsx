@@ -143,8 +143,9 @@ export default function MediaUploader({
                         : m
                 )
             );
-        } catch (error: any) {
-            setUploadError(error.message || 'Upload failed');
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Upload failed';
+            setUploadError(errorMessage);
             // Remove failed upload using latest state
             onChange(valueRef.current.filter((m) => m.url !== tempMedia.url));
         }

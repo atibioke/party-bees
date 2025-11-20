@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_REDIRECT_URI = process.env.NEXTAUTH_URL + '/api/auth/google/callback';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     if (!GOOGLE_CLIENT_ID) {
       return NextResponse.json(

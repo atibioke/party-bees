@@ -7,11 +7,6 @@ export async function middleware(request: NextRequest) {
 
   // CORS handling
   const origin = request.headers.get('origin');
-  const allowedOrigins = ['http://localhost:8081', 'http://localhost:8082', 'http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'];
-  
-  // Simple CORS check or allow all for development if origin is in list
-  // For development, we can be permissive
-  const isAllowedOrigin = origin && allowedOrigins.some(o => origin.startsWith(o));
 
   // Handle preflight requests
   if (request.method === 'OPTIONS') {

@@ -51,7 +51,7 @@ export async function GET() {
         workingRegion = testRegion;
         s3Client = client;
         break;
-      } catch (error: any) {
+      } catch {
         // Continue to next region
         continue;
       }
@@ -80,11 +80,12 @@ export async function GET() {
         ACL: 'public-read', // Ensure file is public for test
       });
       await s3Client.send(putCommand);
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       return NextResponse.json({
         success: false,
         error: 'Failed to upload test file to S3',
-        details: error.message,
+        details: errorMessage,
         foundRegion: workingRegion,
       });
     }
@@ -104,11 +105,12 @@ export async function GET() {
           error: 'Retrieved content does not match uploaded content',
         });
       }
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       return NextResponse.json({
         success: false,
         error: 'Failed to retrieve test file from S3',
-        details: error.message,
+        details: errorMessage,
       });
     }
 
@@ -136,12 +138,14 @@ export async function GET() {
           : ['✓ Configuration is correct!'],
       },
     });
-  } catch (error: any) {
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
     return NextResponse.json({
       success: false,
       error: 'Unexpected error during S3 verification',
-      details: error.message,
-      stack: error.stack,
+      details: errorMessage,
+      stack: errorStack,
     });
   }
 }

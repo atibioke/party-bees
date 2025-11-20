@@ -59,7 +59,7 @@ const EventSchema: Schema = new Schema(
       ],
       default: [],
       validate: {
-        validator: function (v: any[]) {
+        validator: function (v: Array<{ url: string; type: string; order: number }>) {
           const images = v.filter((m) => m.type === 'image');
           const videos = v.filter((m) => m.type === 'video');
           return images.length <= 5 && videos.length <= 1;

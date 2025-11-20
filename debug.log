@@ -211,3 +211,16 @@
 [2025-11-20T17:22:35.857Z] Me API - Token Payload: {"userId":"691f46f6163c21b484330e5c","email":"codersteam45+testyu12@gmail.com"}
 [2025-11-20T17:23:32.227Z] Me API - Token Payload: {"userId":"691f46f6163c21b484330e5c","email":"codersteam45+testyu12@gmail.com"}
 [2025-11-20T17:23:32.305Z] Me API - Token Payload: {"userId":"691f46f6163c21b484330e5c","email":"codersteam45+testyu12@gmail.com"}
+[2025-11-20T18:09:06.989Z] Google User Info: {"email":"nosisky@gmail.com","name":"Nas Abdulrasaq"}
+[2025-11-20T18:09:07.245Z] Conflict detected: Google ID matches user but email does not. Unlinking old user. {"dbEmail":"info@naijavibes.com","googleEmail":"nosisky@gmail.com","userId":"691e849f59ec8077a405d486"}
+[2025-11-20T18:09:07.778Z] Creating new user for: "nosisky@gmail.com"
+[2025-11-20T18:09:14.210Z] Me API - Token Payload: {"userId":"691f5943c207a2fb82bfeedd","email":"nosisky@gmail.com"}
+[2025-11-20T18:09:14.216Z] Me API - Token Payload: {"userId":"691f5943c207a2fb82bfeedd","email":"nosisky@gmail.com"}
+[2025-11-20T18:09:22.613Z] Me API - Token Payload: {"userId":"691f5943c207a2fb82bfeedd","email":"nosisky@gmail.com"}
+[2025-11-20T18:09:22.615Z] Me API - Token Payload: {"userId":"691f5943c207a2fb82bfeedd","email":"nosisky@gmail.com"}
+[2025-11-20T18:10:51.358Z] Me API - Token Payload: {"userId":"691f5943c207a2fb82bfeedd","email":"nosisky@gmail.com"}
+[2025-11-20T18:10:51.359Z] Me API - Token Payload: {"userId":"691f5943c207a2fb82bfeedd","email":"nosisky@gmail.com"}
+[2025-11-20T18:10:51.360Z] Me API - Token Payload: {"userId":"691f5943c207a2fb82bfeedd","email":"nosisky@gmail.com"}
+[2025-11-20T18:10:51.361Z] Me API - Token Payload: {"userId":"691f5943c207a2fb82bfeedd","email":"nosisky@gmail.com"}
+[2025-11-20T18:10:55.457Z] Me API - Token Payload: {"userId":"691f5943c207a2fb82bfeedd","email":"nosisky@gmail.com"}
+[2025-11-20T18:10:55.473Z] Me API - Token Payload: {"userId":"691f5943c207a2fb82bfeedd","email":"nosisky@gmail.com"}

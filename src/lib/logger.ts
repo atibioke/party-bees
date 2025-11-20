@@ -3,7 +3,7 @@ import path from 'path';
 
 const LOG_FILE = path.join(process.cwd(), 'debug.log');
 
-export function logDebug(message: string, data?: any) {
+export function logDebug(message: string, data?: unknown) {
   const timestamp = new Date().toISOString();
   const logEntry = `[${timestamp}] ${message} ${data ? JSON.stringify(data) : ''}\n`;
   

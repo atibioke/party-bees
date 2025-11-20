@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
@@ -42,7 +42,7 @@ interface Event {
 
 const CATEGORIES = ['All', 'Nightlife', 'Music', 'Luxury', 'Food & Drink', 'Networking'];
 
-export default function EventsPage() {
+function EventsPageContent() {
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -468,5 +468,20 @@ export default function EventsPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function EventsPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-slate-950 text-white font-sans flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-400">Loading events...</p>
+        </div>
+      </main>
+    }>
+      <EventsPageContent />
+    </Suspense>
   );
 }

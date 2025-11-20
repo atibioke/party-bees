@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Attendee from '@/models/Attendee';
 import Event from '@/models/Event';
-import mongoose from 'mongoose';
 import { getSession } from '@/lib/auth';
 import { validateNigerianPhone } from '@/utils/phone';
 

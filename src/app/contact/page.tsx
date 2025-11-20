@@ -88,7 +88,7 @@ export default function ContactPage() {
               Contact <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-600">Us</span>
             </h1>
             <p className="text-xl text-slate-400">
-              Have a question or need help? We're here for you.
+              Have a question or need help? We&apos;re here for you.
             </p>
           </div>
 

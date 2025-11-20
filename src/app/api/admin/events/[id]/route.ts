@@ -35,7 +35,7 @@ async function checkAdmin() {
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const adminCheck = await checkAdmin();
@@ -47,7 +47,7 @@ export async function DELETE(
     }
 
     await dbConnect();
-    const eventId = params.id;
+    const { id: eventId } = await params;
 
     const event = await Event.findByIdAndDelete(eventId);
 

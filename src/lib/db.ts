@@ -14,7 +14,6 @@ interface MongooseCache {
 }
 
 declare global {
-  // eslint-disable-next-line no-var
   var mongoose: MongooseCache | undefined;
 }
 
@@ -35,9 +34,13 @@ async function dbConnect() {
       serverSelectionTimeoutMS: 5000,
     };
 
-    console.log('Initializing new MongoDB connection...');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Initializing new MongoDB connection...');
+    }
     cached!.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
-      console.log('MongoDB connected successfully');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('MongoDB connected successfully');
+      }
       return mongoose;
     }).catch(err => {
       console.error('MongoDB connection error:', err);

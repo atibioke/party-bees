@@ -31,8 +31,10 @@ export const sendEmail = async ({ to, subject, html }: MailOptions) => {
       html,
     });
 
-    console.log('Email sent to:', to, from);
-    console.log('Message sent: %s', info.messageId);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Email sent to:', to, from);
+      console.log('Message sent: %s', info.messageId);
+    }
     return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error('Error sending email:', error);

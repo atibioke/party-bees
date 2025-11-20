@@ -20,8 +20,6 @@ export default function MediaGallery({ media }: MediaGalleryProps) {
     const [touchEnd, setTouchEnd] = useState<number | null>(null);
     const carouselRef = useRef<HTMLDivElement>(null);
 
-    if (!media || media.length === 0) return null;
-
     const sortedMedia = [...media].sort((a, b) => a.order - b.order);
     const currentMedia = sortedMedia[selectedIndex];
 
@@ -73,6 +71,8 @@ export default function MediaGallery({ media }: MediaGalleryProps) {
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [sortedMedia.length]);
+
+    if (!media || media.length === 0) return null;
 
     return (
         <div className="space-y-4">

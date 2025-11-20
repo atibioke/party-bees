@@ -150,7 +150,7 @@ export default function ProfileSetupPage() {
                 <label className="text-sm font-medium text-slate-300 mb-2 block">WhatsApp Number</label>
                 <input
                   type="tel"
-                  placeholder="+234 800 000 0000 or 0800 000 0000"
+                  placeholder="+234 800 000 0000"
                   value={form.whatsapp}
                   onChange={e => setForm({ ...form, whatsapp: e.target.value })}
                   onBlur={e => {
@@ -162,7 +162,6 @@ export default function ProfileSetupPage() {
                   className="w-full bg-[#0B0F17] border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-pink-500 transition-colors"
                   required
                 />
-                <p className="text-xs text-slate-500 mt-1">Format: +234 800 000 0000 or 0800 000 0000</p>
               </div>
 
               <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-xs text-blue-200/80 leading-relaxed">

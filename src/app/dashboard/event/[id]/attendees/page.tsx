@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { ArrowLeft, Users, Mail, Phone, Calendar, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/components/ui/Toast';
@@ -16,7 +16,6 @@ interface Attendee {
 
 export default function ViewAttendeesPage() {
   const params = useParams();
-  const router = useRouter();
   const id = params.id as string;
   const { showToast } = useToast();
 

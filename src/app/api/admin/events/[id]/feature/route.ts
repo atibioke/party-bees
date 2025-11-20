@@ -35,7 +35,7 @@ async function checkAdmin() {
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const adminCheck = await checkAdmin();
@@ -48,7 +48,7 @@ export async function PUT(
 
     await dbConnect();
     const { featured } = await req.json();
-    const eventId = params.id;
+    const { id: eventId } = await params;
 
     const event = await Event.findByIdAndUpdate(
       eventId,

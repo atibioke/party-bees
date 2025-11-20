@@ -517,7 +517,6 @@ export default function EditEventPage() {
                                             placeholder="+234 800 000 0000 or 0800 000 0000"
                                             className="w-full bg-[#0B0F17] border border-slate-800 rounded-xl px-3 py-2.5 md:px-4 md:py-3 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
                                         />
-                                        <p className="text-xs text-slate-500 mt-1">Format: +234 800 000 0000 or 0800 000 0000</p>
                                     </div>
                                 </div>
 

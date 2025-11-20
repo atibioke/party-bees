@@ -13,12 +13,10 @@ function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
-  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<{ password: string; confirmPassword: string }>();
   const { showToast } = useToast();
 
-  const password = watch("password");
-
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: { password: string; confirmPassword: string }) => {
     if (!token) {
       showToast('Invalid or missing token', 'error');
       return;
@@ -40,7 +38,7 @@ function ResetPasswordContent() {
       } else {
         showToast(result.error || 'Failed to reset password', 'error');
       }
-    } catch (error) {
+    } catch {
       showToast('An unexpected error occurred', 'error');
     } finally {
       setIsLoading(false);

@@ -25,7 +25,6 @@ export function getNextOccurrence(
   occurrenceNumber: number = 1
 ): { nextStartDate: Date; nextEndDate: Date; occurrenceNumber: number } | null {
   const now = new Date();
-  const duration = originalEndDate.getTime() - originalStartDate.getTime(); // Duration in milliseconds
 
   // Check end conditions
   if (endType === 'on' && recurrenceEndDate && recurrenceEndDate < now) {
@@ -114,7 +113,9 @@ export function hasFutureOccurrences(
     originalEndDate, // Use end date as reference
     originalEndDate,
     pattern,
-    recurrenceEndDate
+    1, // interval
+    recurrenceEndDate ? 'on' : 'never', // endType
+    recurrenceEndDate || undefined
   );
 
   return nextOccurrence !== null;
