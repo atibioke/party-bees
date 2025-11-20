@@ -105,9 +105,8 @@ export default function LandingPage() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
-            <Link href="/events" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">Find Events</Link>
-            <Link href="/about" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">About</Link>
             <UserMenu />
+            <Link href="/events" className="inline-flex items-center justify-center py-3 px-6 rounded-lg font-semibold shadow transition-all duration-200 bg-transparent border-2 border-white/20 text-white hover:bg-white/10 hover:border-white/30 backdrop-blur-sm ">Find Events</Link>
           </div>
 
           {/* Mobile Menu - Use UserMenu which handles mobile menu internally */}
@@ -146,22 +145,22 @@ export default function LandingPage() {
             {/* Large Search Bar */}
             <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto">
               <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-pink-500/20 to-orange-500/20 rounded-2xl blur-xl"></div>
-              <div className="relative bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-2xl p-2 flex items-center gap-2 shadow-2xl">
-                <Search className="w-6 h-6 text-slate-400 ml-4 flex-shrink-0" />
+              <div className="relative bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-2xl p-1.5 sm:p-2 flex items-center gap-1.5 sm:gap-2 shadow-2xl">
+                <Search className="w-4 h-4 sm:w-6 sm:h-6 text-slate-400 ml-2 sm:ml-4 flex-shrink-0" />
                 <input
                   type="text"
                   placeholder="Search events, locations, vibes..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="flex-1 bg-transparent text-white placeholder-slate-500 text-lg py-3 focus:outline-none"
+                  className="flex-1 bg-transparent text-white placeholder-slate-500 text-sm sm:text-lg py-2 sm:py-3 focus:outline-none min-w-0"
                 />
-                <Button type="submit" variant="primary" className="px-8 py-3 text-lg font-bold">
+                <Button type="submit" variant="primary" className="px-3 sm:px-8 py-2 sm:py-3 text-sm sm:text-lg font-bold whitespace-nowrap flex-shrink-0 !border-none">
                   Search
                 </Button>
               </div>
             </form>
 
-            <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+            <p className="text-slate-400 text-sm sm:text-base lg:text-lg max-w-2xl mx-auto leading-relaxed">
               Discover the hottest parties, concerts, and events happening across Nigeria. 
               From rooftop vibes to beach bashes, find your perfect night out in any city.
             </p>
@@ -187,10 +186,10 @@ export default function LandingPage() {
       {/* Trending Events Section */}
       <section className="py-20 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-12">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 sm:mb-12">
             <div>
-              <h2 className="text-4xl font-bold text-white mb-2">Trending Now</h2>
-              <p className="text-slate-400">The hottest events happening this week across Nigeria</p>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-1.5 sm:mb-2">Trending Now</h2>
+              <p className="text-slate-400 text-sm sm:text-base">The hottest events happening this week across Nigeria</p>
             </div>
             <Link href="/events">
               <Button variant="secondary" className="hidden md:flex items-center gap-2">
@@ -290,9 +289,9 @@ export default function LandingPage() {
       {/* Categories Section */}
       <section className="py-20 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-white mb-2">Explore by Category</h2>
-            <p className="text-slate-400">Find events that match your vibe</p>
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-1.5 sm:mb-2">Explore by Category</h2>
+            <p className="text-slate-400 text-sm sm:text-base">Find events that match your vibe</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -316,11 +315,11 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="py-20 relative">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="bg-gradient-to-r from-yellow-500/10 via-pink-500/10 to-orange-500/10 rounded-3xl p-12 border border-slate-800">
-            <h2 className="text-4xl font-bold text-white mb-4">
+          <div className="bg-gradient-to-r from-yellow-500/10 via-pink-500/10 to-orange-500/10 rounded-3xl p-6 sm:p-8 lg:p-12 border border-slate-800">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 sm:mb-4">
               Ready to Host Your Own Event?
             </h2>
-            <p className="text-slate-400 text-lg mb-8">
+            <p className="text-slate-400 text-sm sm:text-base lg:text-lg mb-6 sm:mb-8 leading-relaxed">
               Join thousands of event organizers across Nigeria and create unforgettable experiences.
             </p>
             <Link href="/dashboard/event/new">
@@ -333,49 +332,48 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 py-12">
+      <footer className="border-t border-slate-800 py-8 sm:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+            <div className="col-span-2 md:col-span-1">
+              <div className="flex items-center gap-2 mb-3 sm:mb-4">
                 <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-pink-500 rounded-lg flex items-center justify-center text-xl">
-                  
+                  <PartyPopper size={20} />
                 </div>
-                <span className="text-xl font-bold text-white">Skiboh</span>
+                <span className="text-lg sm:text-xl font-bold text-white">Skiboh</span>
               </div>
-              <p className="text-slate-400 text-sm">
-                The #1 party platform for Nigeria. Find and create unforgettable events across all Nigerian cities.
+              <p className="text-slate-400 text-xs sm:text-sm">
+                The #1 party platform for Nigeria.
               </p>
             </div>
             <div>
-              <h4 className="text-white font-bold mb-4">Discover</h4>
-              <ul className="space-y-2 text-slate-400 text-sm">
+              <h4 className="text-white font-bold mb-3 sm:mb-4 text-sm sm:text-base">Discover</h4>
+              <ul className="space-y-1.5 sm:space-y-2 text-slate-400 text-xs sm:text-sm">
                 <li><Link href="/events" className="hover:text-white transition-colors">All Events</Link></li>
                 <li><Link href="/events?category=nightlife" className="hover:text-white transition-colors">Nightlife</Link></li>
                 <li><Link href="/events?category=music" className="hover:text-white transition-colors">Music</Link></li>
-                <li><Link href="/events?category=beach" className="hover:text-white transition-colors">Beach Parties</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-white font-bold mb-4">Organize</h4>
-              <ul className="space-y-2 text-slate-400 text-sm">
+              <h4 className="text-white font-bold mb-3 sm:mb-4 text-sm sm:text-base">Organize</h4>
+              <ul className="space-y-1.5 sm:space-y-2 text-slate-400 text-xs sm:text-sm">
                 <li><Link href="/dashboard/event/new" className="hover:text-white transition-colors">Create Event</Link></li>
                 <li><Link href="/dashboard" className="hover:text-white transition-colors">My Events</Link></li>
                 <li><Link href="/about" className="hover:text-white transition-colors">How It Works</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-white font-bold mb-4">Connect</h4>
-              <ul className="space-y-2 text-slate-400 text-sm">
-                <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
+              <h4 className="text-white font-bold mb-3 sm:mb-4 text-sm sm:text-base">Connect</h4>
+              <ul className="space-y-1.5 sm:space-y-2 text-slate-400 text-xs sm:text-sm">
+                <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
                 <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
-                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link></li>
+                <li><Link href="/terms" className="hover:text-white transition-colors">Terms</Link></li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400 text-sm">
-            <p>&copy; {new Date().getFullYear()} Skiboh. All rights reserved. Lagos, Nigeria.</p>
+          <div className="border-t border-slate-800 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-slate-400 text-xs sm:text-sm">
+            <p>&copy; {new Date().getFullYear()} Skiboh. All rights reserved.</p>
           </div>
         </div>
       </footer>

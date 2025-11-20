@@ -11,7 +11,15 @@ export async function POST(req: Request) {
     
     // Auth check
     const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
+    let token = cookieStore.get('token')?.value;
+
+    // If no cookie, check Authorization header
+    if (!token) {
+      const authHeader = req.headers.get('Authorization');
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
+      }
+    }
     if (!token) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }

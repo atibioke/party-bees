@@ -261,10 +261,10 @@ export default function EventDetailsPage() {
 
           <div className="flex items-center gap-4">
             <Link href="/events" className="hidden md:block">
-              <Button className="py-2.5 px-6 text-sm shadow-pink-500/20">Browse Events</Button>
+              <Button variant="simple" className="py-2.5 px-6 text-sm shadow-pink-500/20">Browse Events</Button>
             </Link>
             <Link href="/dashboard/event/new" className="hidden md:block">
-              <Button className="py-2.5 px-6 text-sm shadow-pink-500/20">Host a Party</Button>
+              <Button variant="simple" className="py-2.5 px-6 text-sm shadow-pink-500/20">Host a Party</Button>
             </Link>
             <UserMenu />
           </div>

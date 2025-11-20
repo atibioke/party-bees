@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { User, LogOut, Calendar, Plus, Menu, X } from 'lucide-react';
 import Image from 'next/image';
+import { Button } from './ui/Button';
 
 interface UserProfile {
   businessName?: string;
@@ -79,9 +80,9 @@ export function UserMenu() {
           Login
         </Link>
         <Link href="/signup" className="hidden md:block">
-          <button className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-pink-500 text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity">
+          <Button variant="simple">
             Sign Up
-          </button>
+          </Button>
         </Link>
         {/* Mobile menu button */}
         <button
@@ -102,7 +103,7 @@ export function UserMenu() {
             </Link>
             <Link
               href="/signup"
-              className="block px-4 py-2 text-sm text-white bg-gradient-to-r from-yellow-400 to-pink-500 rounded-lg font-semibold hover:opacity-90 transition-opacity"
+              className="block px-4 py-2 text-sm text-white rounded-lg font-semibold hover:opacity-90 transition-opacity"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Sign Up

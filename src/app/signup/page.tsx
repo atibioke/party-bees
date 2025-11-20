@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { FcGoogle } from 'react-icons/fc';
 import { Input } from '@/components/ui/Input';
 import { useToast } from '@/components/ui/Toast';
-import { PartyPopper } from 'lucide-react';
+import { Loader2, PartyPopper } from 'lucide-react';
 import { UserMenu } from '@/components/UserMenu';
 
 export default function SignupPage() {
@@ -155,37 +155,41 @@ export default function SignupPage() {
               onChange={e => setForm({ ...form, businessName: e.target.value })}
             />
 
-            <Input
-              label="Business Email"
-              type="email"
-              placeholder="work@business.com"
-              value={form.businessEmail}
-              onChange={e => setForm({ ...form, businessEmail: e.target.value })}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="Business Email"
+                type="email"
+                placeholder="work@business.com"
+                value={form.businessEmail}
+                onChange={e => setForm({ ...form, businessEmail: e.target.value })}
+              />
 
-            <Input
-              label="WhatsApp Number"
-              type="tel"
-              placeholder="+234 800 000 0000"
-              value={form.whatsapp}
-              onChange={e => setForm({ ...form, whatsapp: e.target.value })}
-            />
+              <Input
+                label="WhatsApp Number"
+                type="tel"
+                placeholder="+234 800 000 0000"
+                value={form.whatsapp}
+                onChange={e => setForm({ ...form, whatsapp: e.target.value })}
+              />
+            </div>
 
-            <Input
-              label="Password"
-              type="password"
-              placeholder="Create a password"
-              value={form.password}
-              onChange={e => setForm({ ...form, password: e.target.value })}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="Password"
+                type="password"
+                placeholder="Create a password"
+                value={form.password}
+                onChange={e => setForm({ ...form, password: e.target.value })}
+              />
 
-            <Input
-              label="Confirm Password"
-              type="password"
-              placeholder="Confirm your password"
-              value={form.confirm}
-              onChange={e => setForm({ ...form, confirm: e.target.value })}
-            />
+              <Input
+                label="Confirm Password"
+                type="password"
+                placeholder="Confirm your password"
+                value={form.confirm}
+                onChange={e => setForm({ ...form, confirm: e.target.value })}
+              />
+            </div>
 
             <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 text-xs text-yellow-200/80 leading-relaxed">
               <span className="font-bold text-yellow-500 block mb-1">⚠️ Verification Notice</span>
@@ -215,7 +219,7 @@ export default function SignupPage() {
       </div>
       {checkingAuth && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="text-white">Loading...</div>
+          <div className="text-white"> <Loader2 size={16} /></div>
         </div>
       )}
     </main>

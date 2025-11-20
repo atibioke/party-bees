@@ -43,7 +43,15 @@ export async function POST(req: Request) {
       path: '/',
     });
 
-    return NextResponse.json({ success: true, data: { id: user._id, email: user.email, businessName: user.businessName } });
+    return NextResponse.json({ 
+      success: true, 
+      data: { 
+        id: user._id, 
+        email: user.email, 
+        businessName: user.businessName,
+        token 
+      } 
+    });
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });

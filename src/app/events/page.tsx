@@ -9,7 +9,8 @@ import {
   MapPin,
   Calendar,
   Filter,
-  Music
+  Music,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { UserMenu } from '@/components/UserMenu';
@@ -423,7 +424,7 @@ export default function EventsPage() {
                       {loadingMore ? (
                         <span className="flex items-center gap-2">
                           <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                          Loading...
+                          <Loader2 size={16} />
                         </span>
                       ) : (
                         'Load More Events'

@@ -7,7 +7,17 @@ import User from '@/models/User';
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
+    let token = cookieStore.get('token')?.value;
+
+    // If no cookie, check Authorization header
+    if (!token) {
+       const { headers } = await import('next/headers');
+       const headersList = await headers();
+       const authHeader = headersList.get('authorization');
+       if (authHeader && authHeader.startsWith('Bearer ')) {
+         token = authHeader.substring(7);
+       }
+    }
 
     if (!token) {
       return NextResponse.json({ success: false, error: 'Not authenticated' }, { status: 401 });

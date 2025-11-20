@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { FcGoogle } from 'react-icons/fc';
 import { Input } from '@/components/ui/Input';
 import { useToast } from '@/components/ui/Toast';
-import { PartyPopper } from 'lucide-react';
+import { Loader2, PartyPopper } from 'lucide-react';
 import { UserMenu } from '@/components/UserMenu';
 
 export default function LoginPage() {
@@ -175,7 +175,7 @@ export default function LoginPage() {
       </div>
       {checkingAuth && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="text-white">Loading...</div>
+          <div className="text-white"> <Loader2 size={16} /></div>
         </div>
       )}
     </main>

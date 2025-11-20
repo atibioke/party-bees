@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Menu, Users, Calendar, LogOut, Search, Ban, Star } from "lucide-react";
+import { Menu, Users, Calendar, LogOut, Search, Ban, Star, Loader2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useToast } from "@/components/ui/Toast";
@@ -310,7 +310,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+        <div className="text-white"><Loader2 size={16} /></div>
       </div>
     );
   }
